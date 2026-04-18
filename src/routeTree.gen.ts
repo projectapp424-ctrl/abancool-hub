@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WebDevelopmentRouteImport } from './routes/web-development'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PosSystemsRouteImport } from './routes/pos-systems'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as HostingRouteImport } from './routes/hosting'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -23,6 +25,11 @@ const WebDevelopmentRoute = WebDevelopmentRouteImport.update({
   path: '/web-development',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -31,6 +38,11 @@ const PricingRoute = PricingRouteImport.update({
 const PosSystemsRoute = PosSystemsRouteImport.update({
   id: '/pos-systems',
   path: '/pos-systems',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HostingRoute = HostingRouteImport.update({
@@ -65,8 +77,10 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
+  '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
 }
 export interface FileRoutesByTo {
@@ -75,8 +89,10 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
+  '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
 }
 export interface FileRoutesById {
@@ -86,8 +102,10 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
+  '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
 }
 export interface FileRouteTypes {
@@ -98,8 +116,10 @@ export interface FileRouteTypes {
     | '/contact'
     | '/domains'
     | '/hosting'
+    | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/signup'
     | '/web-development'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,8 +128,10 @@ export interface FileRouteTypes {
     | '/contact'
     | '/domains'
     | '/hosting'
+    | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/signup'
     | '/web-development'
   id:
     | '__root__'
@@ -118,8 +140,10 @@ export interface FileRouteTypes {
     | '/contact'
     | '/domains'
     | '/hosting'
+    | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/signup'
     | '/web-development'
   fileRoutesById: FileRoutesById
 }
@@ -129,8 +153,10 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DomainsRoute: typeof DomainsRoute
   HostingRoute: typeof HostingRoute
+  LoginRoute: typeof LoginRoute
   PosSystemsRoute: typeof PosSystemsRoute
   PricingRoute: typeof PricingRoute
+  SignupRoute: typeof SignupRoute
   WebDevelopmentRoute: typeof WebDevelopmentRoute
 }
 
@@ -141,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/web-development'
       fullPath: '/web-development'
       preLoaderRoute: typeof WebDevelopmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -155,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/pos-systems'
       fullPath: '/pos-systems'
       preLoaderRoute: typeof PosSystemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hosting': {
@@ -201,10 +241,21 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DomainsRoute: DomainsRoute,
   HostingRoute: HostingRoute,
+  LoginRoute: LoginRoute,
   PosSystemsRoute: PosSystemsRoute,
   PricingRoute: PricingRoute,
+  SignupRoute: SignupRoute,
   WebDevelopmentRoute: WebDevelopmentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
