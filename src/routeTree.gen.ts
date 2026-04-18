@@ -16,6 +16,7 @@ import { Route as PosSystemsRouteImport } from './routes/pos-systems'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HostingRouteImport } from './routes/hosting'
 import { Route as DomainsRouteImport } from './routes/domains'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BulkSmsRouteImport } from './routes/bulk-sms'
 import { Route as IndexRouteImport } from './routes/index'
@@ -55,6 +56,11 @@ const DomainsRoute = DomainsRouteImport.update({
   path: '/domains',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bulk-sms': typeof BulkSmsRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
   '/login': typeof LoginRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bulk-sms': typeof BulkSmsRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
   '/login': typeof LoginRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/bulk-sms': typeof BulkSmsRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
   '/login': typeof LoginRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bulk-sms'
     | '/contact'
+    | '/dashboard'
     | '/domains'
     | '/hosting'
     | '/login'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bulk-sms'
     | '/contact'
+    | '/dashboard'
     | '/domains'
     | '/hosting'
     | '/login'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bulk-sms'
     | '/contact'
+    | '/dashboard'
     | '/domains'
     | '/hosting'
     | '/login'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BulkSmsRoute: typeof BulkSmsRoute
   ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRoute
   DomainsRoute: typeof DomainsRoute
   HostingRoute: typeof HostingRoute
   LoginRoute: typeof LoginRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DomainsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BulkSmsRoute: BulkSmsRoute,
   ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRoute,
   DomainsRoute: DomainsRoute,
   HostingRoute: HostingRoute,
   LoginRoute: LoginRoute,
@@ -250,3 +271,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
