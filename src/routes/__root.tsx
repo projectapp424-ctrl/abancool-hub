@@ -39,12 +39,18 @@ export const Route = createRootRoute({
           "Abancool Technology delivers reliable web hosting, domains, custom development, POS systems and bulk SMS for businesses across Africa.",
       },
       { name: "author", content: "Abancool Technology" },
+      { name: "theme-color", content: "#2563eb" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Abancool Technology" },
       { property: "og:title", content: "Abancool Technology" },
       { property: "og:description", content: "Hosting, domains, POS and bulk SMS — built for businesses that demand uptime." },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Abancool Technology" },
+      { name: "twitter:description", content: "Hosting, domains, POS and bulk SMS — built for businesses that demand uptime." },
     ],
     links: [
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
       {
         rel: "stylesheet",
         href: appCss,

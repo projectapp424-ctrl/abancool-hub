@@ -59,9 +59,9 @@ function ContactPage() {
             </p>
             <ul className="mt-6 space-y-4">
               {[
-                { icon: Mail, label: "Email", value: "hello@abancool.tech" },
-                { icon: Phone, label: "Phone", value: "+254 700 000 000" },
-                { icon: MessageCircle, label: "WhatsApp", value: "+254 700 000 000" },
+                { icon: Mail, label: "Email", value: "info@abancool.com" },
+                { icon: Phone, label: "Phone", value: "0111 679 286 / 0728 825 152" },
+                { icon: MessageCircle, label: "WhatsApp", value: "0728 825 152" },
                 { icon: MapPin, label: "Office", value: "Nairobi, Kenya" },
               ].map((c) => (
                 <li key={c.label} className="flex items-start gap-3">

@@ -18,10 +18,14 @@ export function Footer() {
           </p>
           <ul className="mt-6 space-y-2 text-sm text-white/70">
             <li className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-primary" /> hello@abancool.tech
+              <Mail className="h-4 w-4 text-primary" />
+              <a href="mailto:info@abancool.com" className="hover:text-white">info@abancool.com</a>
             </li>
             <li className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-primary" /> +254 700 000 000
+              <Phone className="h-4 w-4 text-primary" />
+              <a href="tel:+254111679286" className="hover:text-white">0111 679 286</a>
+              <span className="text-white/40">/</span>
+              <a href="tel:+254728825152" className="hover:text-white">0728 825 152</a>
             </li>
             <li className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-primary" /> Nairobi, Kenya
