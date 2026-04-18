@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Server, Cpu, HardDrive, Database, Mail, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Server, Cpu, HardDrive, Database, Mail, ShieldCheck, Check, Loader2 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PriceCard } from "@/components/site/PriceCard";
+import { AddToCartButton } from "@/components/site/AddToCartButton";
+import { supabase } from "@/integrations/supabase/client";
+import { formatKES } from "@/components/dashboard/Shell";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/hosting")({
   head: () => ({
@@ -15,49 +19,16 @@ export const Route = createFileRoute("/hosting")({
   component: HostingPage,
 });
 
-const plans = [
-  {
-    name: "Shared Starter",
-    price: "KSh 299",
-    description: "Perfect for personal sites and small landing pages.",
-    features: ["1 Website", "10 GB SSD Storage", "Unmetered Bandwidth", "5 Email Accounts", "Free SSL Certificate", "DirectAdmin Panel"],
-  },
-  {
-    name: "Business Pro",
-    price: "KSh 899",
-    description: "For growing businesses that need real performance.",
-    features: ["Unlimited Websites", "100 GB NVMe Storage", "Unmetered Bandwidth", "Unlimited Emails", "Free SSL + Daily Backups", "Free Domain (1 year)"],
-    highlighted: true,
-  },
-  {
-    name: "Reseller",
-    price: "KSh 2,499",
-    description: "Sell hosting to your own clients with full WHM access.",
-    features: ["50 cPanel Accounts", "200 GB NVMe Storage", "White-label DNS", "Free Migrations", "Priority Support", "Account Management API"],
-  },
-];
-
-const vps = [
-  {
-    name: "VPS Cloud 1",
-    price: "KSh 2,200",
-    description: "Dedicated resources for production workloads.",
-    features: ["2 vCPU Cores", "4 GB RAM", "60 GB NVMe", "2 TB Bandwidth", "Full Root Access", "Snapshot Backups"],
-  },
-  {
-    name: "VPS Cloud 2",
-    price: "KSh 4,400",
-    description: "Power for growing applications and APIs.",
-    features: ["4 vCPU Cores", "8 GB RAM", "120 GB NVMe", "4 TB Bandwidth", "Full Root Access", "Snapshot Backups"],
-    highlighted: true,
-  },
-  {
-    name: "VPS Cloud 3",
-    price: "KSh 8,800",
-    description: "Heavy workloads, high traffic and large databases.",
-    features: ["8 vCPU Cores", "16 GB RAM", "240 GB NVMe", "8 TB Bandwidth", "Full Root Access", "Snapshot Backups"],
-  },
-];
+interface Plan {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string | null;
+  price: number;
+  billing_cycle: string;
+  features: string[];
+  sort_order: number;
+}
 
 const features = [
   { icon: Server, title: "DirectAdmin panel", desc: "Industry-standard control panel for managing every aspect of your hosting." },
@@ -69,6 +40,20 @@ const features = [
 ];
 
 function HostingPage() {
+  const [plans, setPlans] = useState<Plan[] | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("plans")
+        .select("id, slug, name, tagline, price, billing_cycle, features, sort_order")
+        .eq("type", "hosting")
+        .eq("is_active", true)
+        .order("sort_order");
+      setPlans((data as unknown as Plan[]) ?? []);
+    })();
+  }, []);
+
   return (
     <SiteLayout>
       <PageHero
@@ -79,25 +64,19 @@ function HostingPage() {
 
       <section className="py-20">
         <div className="container-x">
-          <h2 className="text-2xl font-bold md:text-3xl">Shared & Reseller hosting</h2>
+          <h2 className="text-2xl font-bold md:text-3xl">Shared & Business hosting</h2>
           <p className="mt-2 text-muted-foreground">Best for websites, blogs, e-commerce and agencies.</p>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {plans.map((p) => <PriceCard key={p.name} {...p} />)}
-          </div>
+          {plans === null ? (
+            <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {plans.map((p, i) => <PlanCard key={p.id} plan={p} highlighted={i === 1} />)}
+            </div>
+          )}
         </div>
       </section>
 
       <section className="border-t border-border bg-secondary/40 py-20">
-        <div className="container-x">
-          <h2 className="text-2xl font-bold md:text-3xl">VPS Cloud hosting</h2>
-          <p className="mt-2 text-muted-foreground">Dedicated resources, full root access, and zero noisy neighbours.</p>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {vps.map((p) => <PriceCard key={p.name} {...p} />)}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20">
         <div className="container-x">
           <h2 className="text-2xl font-bold md:text-3xl">Every plan includes</h2>
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -114,5 +93,39 @@ function HostingPage() {
         </div>
       </section>
     </SiteLayout>
+  );
+}
+
+export function PlanCard({ plan, highlighted }: { plan: Plan; highlighted?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col rounded-2xl border bg-card p-6 shadow-[var(--shadow-soft)] transition",
+        highlighted ? "border-primary shadow-[var(--shadow-elegant)]" : "border-border",
+      )}
+    >
+      {highlighted && (
+        <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
+          Most popular
+        </span>
+      )}
+      <h3 className="text-lg font-bold">{plan.name}</h3>
+      {plan.tagline && <p className="mt-1 text-sm text-muted-foreground">{plan.tagline}</p>}
+      <div className="mt-4 flex items-baseline gap-1">
+        <span className="text-3xl font-bold tracking-tight">{formatKES(plan.price)}</span>
+        <span className="text-sm text-muted-foreground">/{plan.billing_cycle === "one_time" ? "once" : plan.billing_cycle.replace("ly", "")}</span>
+      </div>
+      <ul className="mt-5 flex-1 space-y-2 text-sm">
+        {plan.features.map((f) => (
+          <li key={f} className="flex items-start gap-2">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-6">
+        <AddToCartButton planId={plan.id} variant={highlighted ? "default" : "outline"} />
+      </div>
+    </div>
   );
 }

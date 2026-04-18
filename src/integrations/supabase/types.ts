@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      cart_items: {
+        Row: {
+          created_at: string
+          custom_billing_cycle:
+            | Database["public"]["Enums"]["billing_cycle"]
+            | null
+          custom_name: string | null
+          custom_price: number | null
+          custom_type: Database["public"]["Enums"]["service_type"] | null
+          domain_name: string | null
+          id: string
+          metadata: Json
+          plan_id: string | null
+          quantity: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_billing_cycle?:
+            | Database["public"]["Enums"]["billing_cycle"]
+            | null
+          custom_name?: string | null
+          custom_price?: number | null
+          custom_type?: Database["public"]["Enums"]["service_type"] | null
+          domain_name?: string | null
+          id?: string
+          metadata?: Json
+          plan_id?: string | null
+          quantity?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_billing_cycle?:
+            | Database["public"]["Enums"]["billing_cycle"]
+            | null
+          custom_name?: string | null
+          custom_price?: number | null
+          custom_type?: Database["public"]["Enums"]["service_type"] | null
+          domain_name?: string | null
+          id?: string
+          metadata?: Json
+          plan_id?: string | null
+          quantity?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
           amount: number
@@ -110,6 +166,122 @@ export type Database = {
           total?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      payment_attempts: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          error_message: string | null
+          id: string
+          invoice_id: string | null
+          method: Database["public"]["Enums"]["payment_method"]
+          phone: string | null
+          provider_receipt: string | null
+          provider_request_id: string | null
+          provider_response: Json | null
+          purpose: string
+          status: Database["public"]["Enums"]["payment_attempt_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          error_message?: string | null
+          id?: string
+          invoice_id?: string | null
+          method: Database["public"]["Enums"]["payment_method"]
+          phone?: string | null
+          provider_receipt?: string | null
+          provider_request_id?: string | null
+          provider_response?: Json | null
+          purpose?: string
+          status?: Database["public"]["Enums"]["payment_attempt_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          error_message?: string | null
+          id?: string
+          invoice_id?: string | null
+          method?: Database["public"]["Enums"]["payment_method"]
+          phone?: string | null
+          provider_receipt?: string | null
+          provider_request_id?: string | null
+          provider_response?: Json | null
+          purpose?: string
+          status?: Database["public"]["Enums"]["payment_attempt_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_attempts_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          billing_cycle: Database["public"]["Enums"]["billing_cycle"]
+          created_at: string
+          currency: string
+          description: string | null
+          features: Json
+          id: string
+          is_active: boolean
+          metadata: Json
+          name: string
+          price: number
+          slug: string
+          sort_order: number
+          tagline: string | null
+          type: Database["public"]["Enums"]["service_type"]
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
+          created_at?: string
+          currency?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name: string
+          price?: number
+          slug: string
+          sort_order?: number
+          tagline?: string | null
+          type: Database["public"]["Enums"]["service_type"]
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
+          created_at?: string
+          currency?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name?: string
+          price?: number
+          slug?: string
+          sort_order?: number
+          tagline?: string | null
+          type?: Database["public"]["Enums"]["service_type"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -356,6 +528,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_invoice_from_cart: { Args: never; Returns: string }
+      credit_wallet_topup: {
+        Args: { _amount: number; _description: string; _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -364,6 +541,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      pay_invoice_with_wallet: { Args: { _invoice_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "client" | "reseller" | "admin" | "super_admin"
@@ -380,6 +558,13 @@ export type Database = {
         | "overdue"
         | "cancelled"
         | "refunded"
+      payment_attempt_status:
+        | "initiated"
+        | "pending"
+        | "success"
+        | "failed"
+        | "cancelled"
+        | "timeout"
       payment_method: "mpesa" | "card" | "wallet" | "bank_transfer" | "manual"
       service_status:
         | "pending"
@@ -540,6 +725,14 @@ export const Constants = {
         "overdue",
         "cancelled",
         "refunded",
+      ],
+      payment_attempt_status: [
+        "initiated",
+        "pending",
+        "success",
+        "failed",
+        "cancelled",
+        "timeout",
       ],
       payment_method: ["mpesa", "card", "wallet", "bank_transfer", "manual"],
       service_status: [
