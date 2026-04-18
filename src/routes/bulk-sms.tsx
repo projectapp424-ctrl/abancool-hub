@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MessageSquare, Users, BarChart3, Tag, Upload, Send } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MessageSquare, Users, BarChart3, Tag, Upload, Send, Loader2 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PriceCard } from "@/components/site/PriceCard";
+import { PlanCard } from "@/routes/hosting";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/bulk-sms")({
   head: () => ({
@@ -15,6 +17,11 @@ export const Route = createFileRoute("/bulk-sms")({
   component: SmsPage,
 });
 
+interface Plan {
+  id: string; slug: string; name: string; tagline: string | null;
+  price: number; billing_cycle: string; features: string[]; sort_order: number;
+}
+
 const features = [
   { icon: Send, title: "Send instantly", desc: "Schedule or fire campaigns to thousands of contacts in seconds." },
   { icon: Tag, title: "Branded sender IDs", desc: "Replace the number with your business name for higher trust." },
@@ -24,32 +31,21 @@ const features = [
   { icon: MessageSquare, title: "Developer API", desc: "Trigger transactional SMS from your app, POS or CRM." },
 ];
 
-const plans = [
-  {
-    name: "Starter Pack",
-    price: "KSh 800",
-    period: "",
-    description: "Perfect for testing and small campaigns.",
-    features: ["1,000 SMS credits", "1 Sender ID", "Delivery reports", "CSV upload", "Email support"],
-  },
-  {
-    name: "Business Pack",
-    price: "KSh 3,500",
-    period: "",
-    description: "For regular customer engagement.",
-    features: ["5,000 SMS credits", "3 Sender IDs", "Delivery reports", "API access", "Priority support"],
-    highlighted: true,
-  },
-  {
-    name: "Enterprise Pack",
-    price: "KSh 12,000",
-    period: "",
-    description: "High-volume marketing and transactional traffic.",
-    features: ["20,000 SMS credits", "Unlimited Sender IDs", "Dedicated route", "Account manager", "99.9% delivery SLA"],
-  },
-];
-
 function SmsPage() {
+  const [plans, setPlans] = useState<Plan[] | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("plans")
+        .select("id, slug, name, tagline, price, billing_cycle, features, sort_order")
+        .eq("type", "sms")
+        .eq("is_active", true)
+        .order("sort_order");
+      setPlans((data as unknown as Plan[]) ?? []);
+    })();
+  }, []);
+
   return (
     <SiteLayout>
       <PageHero
@@ -79,9 +75,13 @@ function SmsPage() {
         <div className="container-x">
           <h2 className="text-2xl font-bold md:text-3xl">SMS credit packs</h2>
           <p className="mt-2 text-muted-foreground">Buy credits once. Use them whenever you need.</p>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {plans.map((p) => <PriceCard key={p.name} {...p} />)}
-          </div>
+          {plans === null ? (
+            <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {plans.map((p, i) => <PlanCard key={p.id} plan={p} highlighted={i === 1} />)}
+            </div>
+          )}
         </div>
       </section>
     </SiteLayout>

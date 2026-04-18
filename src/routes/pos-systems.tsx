@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Store, Utensils, Wine, Pill, BarChart3, Users, Boxes, Receipt } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Store, Utensils, Wine, Pill, BarChart3, Users, Boxes, Receipt, Loader2 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PriceCard } from "@/components/site/PriceCard";
+import { PlanCard } from "@/routes/hosting";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/pos-systems")({
   head: () => ({
@@ -15,6 +17,11 @@ export const Route = createFileRoute("/pos-systems")({
   component: PosPage,
 });
 
+interface Plan {
+  id: string; slug: string; name: string; tagline: string | null;
+  price: number; billing_cycle: string; features: string[]; sort_order: number;
+}
+
 const verticals = [
   { icon: Store, title: "Retail POS", desc: "Barcode scanning, multi-branch stock, supplier management." },
   { icon: Utensils, title: "Restaurant POS", desc: "Table management, kitchen display screens and split bills." },
@@ -22,36 +29,28 @@ const verticals = [
   { icon: Pill, title: "Pharmacy POS", desc: "Batch & expiry tracking, prescription logs, insurance billing." },
 ];
 
-const features = [
+const benefits = [
   { icon: BarChart3, title: "Live sales reports", desc: "Track revenue, top products and staff performance in real time." },
   { icon: Boxes, title: "Inventory management", desc: "Stock levels, low-stock alerts and automatic reorder points." },
   { icon: Users, title: "Staff & roles", desc: "Cashier, supervisor and manager permissions out of the box." },
   { icon: Receipt, title: "Receipts & invoices", desc: "Print or email branded receipts. M-Pesa and card supported." },
 ];
 
-const plans = [
-  {
-    name: "Starter",
-    price: "KSh 1,500",
-    description: "One outlet getting started.",
-    features: ["1 Branch / Outlet", "2 Cashier accounts", "Unlimited products", "Daily sales reports", "Email support"],
-  },
-  {
-    name: "Growth",
-    price: "KSh 3,500",
-    description: "For multi-cashier businesses.",
-    features: ["Up to 3 Branches", "10 Staff accounts", "Inventory & suppliers", "Advanced reports", "Priority support"],
-    highlighted: true,
-  },
-  {
-    name: "Enterprise",
-    price: "KSh 7,500",
-    description: "Chains, franchises and large operations.",
-    features: ["Unlimited branches", "Unlimited staff", "Custom integrations", "Dedicated account manager", "On-site training"],
-  },
-];
-
 function PosPage() {
+  const [plans, setPlans] = useState<Plan[] | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("plans")
+        .select("id, slug, name, tagline, price, billing_cycle, features, sort_order")
+        .eq("type", "pos")
+        .eq("is_active", true)
+        .order("sort_order");
+      setPlans((data as unknown as Plan[]) ?? []);
+    })();
+  }, []);
+
   return (
     <SiteLayout>
       <PageHero
@@ -81,7 +80,7 @@ function PosPage() {
         <div className="container-x">
           <h2 className="text-2xl font-bold md:text-3xl">Everything you need to run a counter</h2>
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {features.map((f) => (
+            {benefits.map((f) => (
               <div key={f.title} className="rounded-2xl bg-card p-6 shadow-[var(--shadow-soft)]">
                 <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
                   <f.icon className="h-5 w-5" />
@@ -98,9 +97,13 @@ function PosPage() {
         <div className="container-x">
           <h2 className="text-2xl font-bold md:text-3xl">POS subscription plans</h2>
           <p className="mt-2 text-muted-foreground">Per outlet, billed monthly. Cancel anytime.</p>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {plans.map((p) => <PriceCard key={p.name} {...p} />)}
-          </div>
+          {plans === null ? (
+            <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {plans.map((p, i) => <PlanCard key={p.id} plan={p} highlighted={i === 0} />)}
+            </div>
+          )}
         </div>
       </section>
     </SiteLayout>
