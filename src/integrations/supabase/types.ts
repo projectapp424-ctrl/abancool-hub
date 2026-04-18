@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -321,6 +351,54 @@ export type Database = {
         }
         Relationships: []
       }
+      provisioning_jobs: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          invoice_id: string | null
+          last_error: string | null
+          payload: Json
+          provider: string
+          result: Json
+          service_id: string | null
+          status: Database["public"]["Enums"]["provisioning_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          last_error?: string | null
+          payload?: Json
+          provider: string
+          result?: Json
+          service_id?: string | null
+          status?: Database["public"]["Enums"]["provisioning_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          last_error?: string | null
+          payload?: Json
+          provider?: string
+          result?: Json
+          service_id?: string | null
+          status?: Database["public"]["Enums"]["provisioning_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           billing_cycle: Database["public"]["Enums"]["billing_cycle"]
@@ -365,6 +443,66 @@ export type Database = {
           status?: Database["public"]["Enums"]["service_status"]
           type?: Database["public"]["Enums"]["service_type"]
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sms_credits: {
+        Row: {
+          balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sms_messages: {
+        Row: {
+          cost_credits: number
+          created_at: string
+          error_message: string | null
+          id: string
+          message: string
+          provider: string
+          provider_message_id: string | null
+          recipient: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["sms_status"]
+          user_id: string
+        }
+        Insert: {
+          cost_credits?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message: string
+          provider?: string
+          provider_message_id?: string | null
+          recipient: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["sms_status"]
+          user_id: string
+        }
+        Update: {
+          cost_credits?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message?: string
+          provider?: string
+          provider_message_id?: string | null
+          recipient?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["sms_status"]
           user_id?: string
         }
         Relationships: []
@@ -528,10 +666,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_credit_wallet: {
+        Args: { _amount: number; _description: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_grant_sms_credits: {
+        Args: { _credits: number; _reason?: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_refund_invoice: {
+        Args: { _invoice_id: string; _reason?: string }
+        Returns: Json
+      }
+      admin_set_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       create_invoice_from_cart: { Args: never; Returns: string }
       credit_wallet_topup: {
         Args: { _amount: number; _description: string; _user_id: string }
         Returns: undefined
+      }
+      enqueue_provisioning_job: {
+        Args: { _payload?: Json; _provider: string; _service_id: string }
+        Returns: string
       }
       has_role: {
         Args: {
@@ -541,6 +702,15 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      log_admin_action: {
+        Args: {
+          _action: string
+          _metadata?: Json
+          _target_id: string
+          _target_type: string
+        }
+        Returns: string
+      }
       pay_invoice_with_wallet: { Args: { _invoice_id: string }; Returns: Json }
     }
     Enums: {
@@ -566,6 +736,12 @@ export type Database = {
         | "cancelled"
         | "timeout"
       payment_method: "mpesa" | "card" | "wallet" | "bank_transfer" | "manual"
+      provisioning_status:
+        | "queued"
+        | "running"
+        | "succeeded"
+        | "failed"
+        | "cancelled"
       service_status:
         | "pending"
         | "active"
@@ -580,6 +756,7 @@ export type Database = {
         | "pos"
         | "sms"
         | "web_development"
+      sms_status: "queued" | "sent" | "delivered" | "failed"
       ticket_priority: "low" | "medium" | "high" | "urgent"
       ticket_status: "open" | "pending" | "answered" | "closed"
       wallet_tx_type: "deposit" | "payment" | "refund" | "adjustment"
@@ -735,6 +912,13 @@ export const Constants = {
         "timeout",
       ],
       payment_method: ["mpesa", "card", "wallet", "bank_transfer", "manual"],
+      provisioning_status: [
+        "queued",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled",
+      ],
       service_status: [
         "pending",
         "active",
@@ -751,6 +935,7 @@ export const Constants = {
         "sms",
         "web_development",
       ],
+      sms_status: ["queued", "sent", "delivered", "failed"],
       ticket_priority: ["low", "medium", "high", "urgent"],
       ticket_status: ["open", "pending", "answered", "closed"],
       wallet_tx_type: ["deposit", "payment", "refund", "adjustment"],
