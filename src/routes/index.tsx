@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { TeamSection } from "@/components/site/TeamSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImg from "@/assets/hero-tech.jpg";
@@ -184,8 +185,11 @@ function HomePage() {
         </div>
       </section>
 
+      {/* TEAM */}
+      <TeamSection />
+
       {/* CTA */}
-      <section className="pb-20">
+      <section className="pb-20 pt-20">
         <div className="container-x">
           <div className="relative overflow-hidden rounded-3xl bg-[color:var(--brand-navy)] p-10 text-white md:p-14">
             <div className="absolute inset-0 opacity-60" style={{ background: "var(--gradient-hero)" }} />
