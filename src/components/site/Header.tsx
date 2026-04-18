@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Cloud } from "lucide-react";
+import { Menu, X, Cloud, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
+import { CartButton } from "@/components/site/CartDrawer";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -16,6 +18,8 @@ const nav = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="container-x flex h-16 items-center justify-between">
@@ -43,21 +47,33 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">Sign in</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link to="/signup">Get Started</Link>
-          </Button>
+          <CartButton />
+          {user ? (
+            <Button size="sm" asChild>
+              <Link to="/dashboard"><LayoutDashboard className="mr-1 h-4 w-4" />Dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/login">Sign in</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/signup">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
 
-        <button
-          aria-label="Toggle menu"
-          onClick={() => setOpen((s) => !s)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground lg:hidden"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-1 lg:hidden">
+          <CartButton />
+          <button
+            aria-label="Toggle menu"
+            onClick={() => setOpen((s) => !s)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -76,12 +92,20 @@ export function Header() {
               </Link>
             ))}
             <div className="mt-2 flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1" asChild>
-                <Link to="/login">Sign in</Link>
-              </Button>
-              <Button size="sm" className="flex-1" asChild>
-                <Link to="/signup">Get Started</Link>
-              </Button>
+              {user ? (
+                <Button size="sm" className="flex-1" asChild>
+                  <Link to="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Link to="/login">Sign in</Link>
+                  </Button>
+                  <Button size="sm" className="flex-1" asChild>
+                    <Link to="/signup">Get Started</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
