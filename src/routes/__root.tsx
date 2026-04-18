@@ -29,14 +29,17 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Abancool Technology — Hosting, Domains, POS & Bulk SMS" },
+      {
+        name: "description",
+        content:
+          "Abancool Technology delivers reliable web hosting, domains, custom development, POS systems and bulk SMS for businesses across Africa.",
+      },
+      { name: "author", content: "Abancool Technology" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { property: "og:title", content: "Abancool Technology" },
+      { property: "og:description", content: "Hosting, domains, POS and bulk SMS — built for businesses that demand uptime." },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {
