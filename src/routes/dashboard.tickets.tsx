@@ -47,9 +47,11 @@ function TicketsPage() {
     const { data: t, error } = await supabase
       .from("support_tickets")
       .insert({
-        user_id: user.id, subject: form.subject.trim(),
+        user_id: user.id,
+        subject: form.subject.trim(),
         priority: form.priority as "low" | "medium" | "high" | "urgent",
         department: form.department,
+        ticket_number: "",
       })
       .select("id").single();
     if (error || !t) { setBusy(false); toast.error(error?.message ?? "Failed to create ticket."); return; }
