@@ -116,7 +116,7 @@ export const Route = createFileRoute("/api/provisioning/run")({
           if (outcome.ok) {
             await a.from("provisioning_jobs").update({
               status: "succeeded",
-              result: outcome.result,
+              result: outcome.result as unknown as Database["public"]["Tables"]["provisioning_jobs"]["Update"]["result"],
               completed_at: new Date().toISOString(),
               last_error: null,
             }).eq("id", job.id);

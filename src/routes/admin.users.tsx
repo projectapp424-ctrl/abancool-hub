@@ -110,7 +110,7 @@ function AdminUsers() {
         const v = parseInt(amount, 10);
         if (!Number.isFinite(v) || v === 0) throw new Error("Enter a non-zero credit amount");
         const { error } = await supabase.rpc("admin_grant_sms_credits", {
-          _user_id: active.id, _credits: v, _reason: note || null,
+          _user_id: active.id, _credits: v, _reason: note || undefined,
         });
         if (error) throw error;
         toast.success(`Granted ${v} SMS credits`);

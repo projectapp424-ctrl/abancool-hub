@@ -11,17 +11,21 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WebDevelopmentRouteImport } from './routes/web-development'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PosSystemsRouteImport } from './routes/pos-systems'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HostingRouteImport } from './routes/hosting'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BulkSmsRouteImport } from './routes/bulk-sms'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as DashboardWalletRouteImport } from './routes/dashboard.wallet'
 import { Route as DashboardTicketsRouteImport } from './routes/dashboard.tickets'
 import { Route as DashboardSmsRouteImport } from './routes/dashboard.sms'
@@ -31,6 +35,16 @@ import { Route as DashboardPosRouteImport } from './routes/dashboard.pos'
 import { Route as DashboardHostingRouteImport } from './routes/dashboard.hosting'
 import { Route as DashboardDomainsRouteImport } from './routes/dashboard.domains'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTicketsRouteImport } from './routes/admin.tickets'
+import { Route as AdminServicesRouteImport } from './routes/admin.services'
+import { Route as AdminProvisioningRouteImport } from './routes/admin.provisioning'
+import { Route as AdminPlansRouteImport } from './routes/admin.plans'
+import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
+import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as ApiSmsSendRouteImport } from './routes/api.sms.send'
+import { Route as ApiProvisioningRunRouteImport } from './routes/api.provisioning.run'
 import { Route as ApiMpesaStkPushRouteImport } from './routes/api.mpesa.stk-push'
 import { Route as ApiMpesaStatusRouteImport } from './routes/api.mpesa.status'
 import { Route as ApiMpesaCallbackRouteImport } from './routes/api.mpesa.callback'
@@ -43,6 +57,11 @@ const WebDevelopmentRoute = WebDevelopmentRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -63,6 +82,11 @@ const LoginRoute = LoginRouteImport.update({
 const HostingRoute = HostingRouteImport.update({
   id: '/hosting',
   path: '/hosting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DomainsRoute = DomainsRouteImport.update({
@@ -90,6 +114,11 @@ const BulkSmsRoute = BulkSmsRouteImport.update({
   path: '/bulk-sms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -99,6 +128,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const DashboardWalletRoute = DashboardWalletRouteImport.update({
   id: '/wallet',
@@ -145,6 +179,56 @@ const DashboardBillingRoute = DashboardBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTicketsRoute = AdminTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProvisioningRoute = AdminProvisioningRouteImport.update({
+  id: '/provisioning',
+  path: '/provisioning',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPlansRoute = AdminPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ApiSmsSendRoute = ApiSmsSendRouteImport.update({
+  id: '/api/sms/send',
+  path: '/api/sms/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProvisioningRunRoute = ApiProvisioningRunRouteImport.update({
+  id: '/api/provisioning/run',
+  path: '/api/provisioning/run',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMpesaStkPushRoute = ApiMpesaStkPushRouteImport.update({
   id: '/api/mpesa/stk-push',
   path: '/api/mpesa/stk-push',
@@ -163,17 +247,28 @@ const ApiMpesaCallbackRoute = ApiMpesaCallbackRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bulk-sms': typeof BulkSmsRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/domains': typeof DomainsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/hosting': typeof HostingRoute
   '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/provisioning': typeof AdminProvisioningRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/hosting': typeof DashboardHostingRoute
@@ -183,10 +278,13 @@ export interface FileRoutesByFullPath {
   '/dashboard/sms': typeof DashboardSmsRoute
   '/dashboard/tickets': typeof DashboardTicketsRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
   '/api/mpesa/status': typeof ApiMpesaStatusRoute
   '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
+  '/api/provisioning/run': typeof ApiProvisioningRunRoute
+  '/api/sms/send': typeof ApiSmsSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -194,12 +292,22 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/domains': typeof DomainsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/hosting': typeof HostingRoute
   '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/provisioning': typeof AdminProvisioningRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/hosting': typeof DashboardHostingRoute
@@ -209,25 +317,39 @@ export interface FileRoutesByTo {
   '/dashboard/sms': typeof DashboardSmsRoute
   '/dashboard/tickets': typeof DashboardTicketsRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
+  '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
   '/api/mpesa/status': typeof ApiMpesaStatusRoute
   '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
+  '/api/provisioning/run': typeof ApiProvisioningRunRoute
+  '/api/sms/send': typeof ApiSmsSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bulk-sms': typeof BulkSmsRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/domains': typeof DomainsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/hosting': typeof HostingRoute
   '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/plans': typeof AdminPlansRoute
+  '/admin/provisioning': typeof AdminProvisioningRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/domains': typeof DashboardDomainsRoute
   '/dashboard/hosting': typeof DashboardHostingRoute
@@ -237,26 +359,40 @@ export interface FileRoutesById {
   '/dashboard/sms': typeof DashboardSmsRoute
   '/dashboard/tickets': typeof DashboardTicketsRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
   '/api/mpesa/status': typeof ApiMpesaStatusRoute
   '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
+  '/api/provisioning/run': typeof ApiProvisioningRunRoute
+  '/api/sms/send': typeof ApiSmsSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/bulk-sms'
     | '/checkout'
     | '/contact'
     | '/dashboard'
     | '/domains'
+    | '/forgot-password'
     | '/hosting'
     | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/reset-password'
     | '/signup'
     | '/web-development'
+    | '/admin/audit'
+    | '/admin/invoices'
+    | '/admin/payments'
+    | '/admin/plans'
+    | '/admin/provisioning'
+    | '/admin/services'
+    | '/admin/tickets'
+    | '/admin/users'
     | '/dashboard/billing'
     | '/dashboard/domains'
     | '/dashboard/hosting'
@@ -266,10 +402,13 @@ export interface FileRouteTypes {
     | '/dashboard/sms'
     | '/dashboard/tickets'
     | '/dashboard/wallet'
+    | '/admin/'
     | '/dashboard/'
     | '/api/mpesa/callback'
     | '/api/mpesa/status'
     | '/api/mpesa/stk-push'
+    | '/api/provisioning/run'
+    | '/api/sms/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -277,12 +416,22 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/domains'
+    | '/forgot-password'
     | '/hosting'
     | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/reset-password'
     | '/signup'
     | '/web-development'
+    | '/admin/audit'
+    | '/admin/invoices'
+    | '/admin/payments'
+    | '/admin/plans'
+    | '/admin/provisioning'
+    | '/admin/services'
+    | '/admin/tickets'
+    | '/admin/users'
     | '/dashboard/billing'
     | '/dashboard/domains'
     | '/dashboard/hosting'
@@ -292,24 +441,38 @@ export interface FileRouteTypes {
     | '/dashboard/sms'
     | '/dashboard/tickets'
     | '/dashboard/wallet'
+    | '/admin'
     | '/dashboard'
     | '/api/mpesa/callback'
     | '/api/mpesa/status'
     | '/api/mpesa/stk-push'
+    | '/api/provisioning/run'
+    | '/api/sms/send'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/bulk-sms'
     | '/checkout'
     | '/contact'
     | '/dashboard'
     | '/domains'
+    | '/forgot-password'
     | '/hosting'
     | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/reset-password'
     | '/signup'
     | '/web-development'
+    | '/admin/audit'
+    | '/admin/invoices'
+    | '/admin/payments'
+    | '/admin/plans'
+    | '/admin/provisioning'
+    | '/admin/services'
+    | '/admin/tickets'
+    | '/admin/users'
     | '/dashboard/billing'
     | '/dashboard/domains'
     | '/dashboard/hosting'
@@ -319,28 +482,36 @@ export interface FileRouteTypes {
     | '/dashboard/sms'
     | '/dashboard/tickets'
     | '/dashboard/wallet'
+    | '/admin/'
     | '/dashboard/'
     | '/api/mpesa/callback'
     | '/api/mpesa/status'
     | '/api/mpesa/stk-push'
+    | '/api/provisioning/run'
+    | '/api/sms/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BulkSmsRoute: typeof BulkSmsRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   DomainsRoute: typeof DomainsRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   HostingRoute: typeof HostingRoute
   LoginRoute: typeof LoginRoute
   PosSystemsRoute: typeof PosSystemsRoute
   PricingRoute: typeof PricingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   WebDevelopmentRoute: typeof WebDevelopmentRoute
   ApiMpesaCallbackRoute: typeof ApiMpesaCallbackRoute
   ApiMpesaStatusRoute: typeof ApiMpesaStatusRoute
   ApiMpesaStkPushRoute: typeof ApiMpesaStkPushRoute
+  ApiProvisioningRunRoute: typeof ApiProvisioningRunRoute
+  ApiSmsSendRoute: typeof ApiSmsSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -357,6 +528,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -385,6 +563,13 @@ declare module '@tanstack/react-router' {
       path: '/hosting'
       fullPath: '/hosting'
       preLoaderRoute: typeof HostingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/domains': {
@@ -422,6 +607,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BulkSmsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -435,6 +627,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/dashboard/wallet': {
       id: '/dashboard/wallet'
@@ -499,6 +698,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBillingRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/tickets': {
+      id: '/admin/tickets'
+      path: '/tickets'
+      fullPath: '/admin/tickets'
+      preLoaderRoute: typeof AdminTicketsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/provisioning': {
+      id: '/admin/provisioning'
+      path: '/provisioning'
+      fullPath: '/admin/provisioning'
+      preLoaderRoute: typeof AdminProvisioningRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/plans': {
+      id: '/admin/plans'
+      path: '/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AdminPlansRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/payments': {
+      id: '/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminPaymentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/invoices': {
+      id: '/admin/invoices'
+      path: '/invoices'
+      fullPath: '/admin/invoices'
+      preLoaderRoute: typeof AdminInvoicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/api/sms/send': {
+      id: '/api/sms/send'
+      path: '/api/sms/send'
+      fullPath: '/api/sms/send'
+      preLoaderRoute: typeof ApiSmsSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/provisioning/run': {
+      id: '/api/provisioning/run'
+      path: '/api/provisioning/run'
+      fullPath: '/api/provisioning/run'
+      preLoaderRoute: typeof ApiProvisioningRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/mpesa/stk-push': {
       id: '/api/mpesa/stk-push'
       path: '/api/mpesa/stk-push'
@@ -522,6 +791,32 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminAuditRoute: typeof AdminAuditRoute
+  AdminInvoicesRoute: typeof AdminInvoicesRoute
+  AdminPaymentsRoute: typeof AdminPaymentsRoute
+  AdminPlansRoute: typeof AdminPlansRoute
+  AdminProvisioningRoute: typeof AdminProvisioningRoute
+  AdminServicesRoute: typeof AdminServicesRoute
+  AdminTicketsRoute: typeof AdminTicketsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuditRoute: AdminAuditRoute,
+  AdminInvoicesRoute: AdminInvoicesRoute,
+  AdminPaymentsRoute: AdminPaymentsRoute,
+  AdminPlansRoute: AdminPlansRoute,
+  AdminProvisioningRoute: AdminProvisioningRoute,
+  AdminServicesRoute: AdminServicesRoute,
+  AdminTicketsRoute: AdminTicketsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardBillingRoute: typeof DashboardBillingRoute
@@ -555,20 +850,25 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   BulkSmsRoute: BulkSmsRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRouteWithChildren,
   DomainsRoute: DomainsRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   HostingRoute: HostingRoute,
   LoginRoute: LoginRoute,
   PosSystemsRoute: PosSystemsRoute,
   PricingRoute: PricingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   WebDevelopmentRoute: WebDevelopmentRoute,
   ApiMpesaCallbackRoute: ApiMpesaCallbackRoute,
   ApiMpesaStatusRoute: ApiMpesaStatusRoute,
   ApiMpesaStkPushRoute: ApiMpesaStkPushRoute,
+  ApiProvisioningRunRoute: ApiProvisioningRunRoute,
+  ApiSmsSendRoute: ApiSmsSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

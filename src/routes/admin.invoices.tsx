@@ -45,7 +45,7 @@ function AdminInvoices() {
 
   async function refund() {
     if (!refundOf) return;
-    const { error } = await supabase.rpc("admin_refund_invoice", { _invoice_id: refundOf.id, _reason: reason || null });
+    const { error } = await supabase.rpc("admin_refund_invoice", { _invoice_id: refundOf.id, _reason: reason || undefined });
     if (error) { toast.error(error.message); return; }
     toast.success("Refunded to wallet");
     setRefundOf(null); setReason("");
