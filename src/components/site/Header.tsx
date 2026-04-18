@@ -44,10 +44,10 @@ export function Header() {
 
         <div className="hidden items-center gap-2 lg:flex">
           <Button variant="ghost" size="sm" asChild>
-            <a href="#login">Sign in</a>
+            <Link to="/login">Sign in</Link>
           </Button>
           <Button size="sm" asChild>
-            <a href="#signup">Get Started</a>
+            <Link to="/signup">Get Started</Link>
           </Button>
         </div>
 
@@ -77,10 +77,10 @@ export function Header() {
             ))}
             <div className="mt-2 flex gap-2">
               <Button variant="outline" size="sm" className="flex-1" asChild>
-                <a href="#login">Sign in</a>
+                <Link to="/login">Sign in</Link>
               </Button>
               <Button size="sm" className="flex-1" asChild>
-                <a href="#signup">Get Started</a>
+                <Link to="/signup">Get Started</Link>
               </Button>
             </div>
           </div>
