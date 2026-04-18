@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WebDevelopmentRouteImport } from './routes/web-development'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PosSystemsRouteImport } from './routes/pos-systems'
+import { Route as HostingRouteImport } from './routes/hosting'
+import { Route as DomainsRouteImport } from './routes/domains'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BulkSmsRouteImport } from './routes/bulk-sms'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WebDevelopmentRoute = WebDevelopmentRouteImport.update({
+  id: '/web-development',
+  path: '/web-development',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PosSystemsRoute = PosSystemsRouteImport.update({
+  id: '/pos-systems',
+  path: '/pos-systems',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostingRoute = HostingRouteImport.update({
+  id: '/hosting',
+  path: '/hosting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DomainsRoute = DomainsRouteImport.update({
+  id: '/domains',
+  path: '/domains',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BulkSmsRoute = BulkSmsRouteImport.update({
+  id: '/bulk-sms',
+  path: '/bulk-sms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bulk-sms': typeof BulkSmsRoute
+  '/contact': typeof ContactRoute
+  '/domains': typeof DomainsRoute
+  '/hosting': typeof HostingRoute
+  '/pos-systems': typeof PosSystemsRoute
+  '/pricing': typeof PricingRoute
+  '/web-development': typeof WebDevelopmentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bulk-sms': typeof BulkSmsRoute
+  '/contact': typeof ContactRoute
+  '/domains': typeof DomainsRoute
+  '/hosting': typeof HostingRoute
+  '/pos-systems': typeof PosSystemsRoute
+  '/pricing': typeof PricingRoute
+  '/web-development': typeof WebDevelopmentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bulk-sms': typeof BulkSmsRoute
+  '/contact': typeof ContactRoute
+  '/domains': typeof DomainsRoute
+  '/hosting': typeof HostingRoute
+  '/pos-systems': typeof PosSystemsRoute
+  '/pricing': typeof PricingRoute
+  '/web-development': typeof WebDevelopmentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/bulk-sms'
+    | '/contact'
+    | '/domains'
+    | '/hosting'
+    | '/pos-systems'
+    | '/pricing'
+    | '/web-development'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/bulk-sms'
+    | '/contact'
+    | '/domains'
+    | '/hosting'
+    | '/pos-systems'
+    | '/pricing'
+    | '/web-development'
+  id:
+    | '__root__'
+    | '/'
+    | '/bulk-sms'
+    | '/contact'
+    | '/domains'
+    | '/hosting'
+    | '/pos-systems'
+    | '/pricing'
+    | '/web-development'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BulkSmsRoute: typeof BulkSmsRoute
+  ContactRoute: typeof ContactRoute
+  DomainsRoute: typeof DomainsRoute
+  HostingRoute: typeof HostingRoute
+  PosSystemsRoute: typeof PosSystemsRoute
+  PricingRoute: typeof PricingRoute
+  WebDevelopmentRoute: typeof WebDevelopmentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/web-development': {
+      id: '/web-development'
+      path: '/web-development'
+      fullPath: '/web-development'
+      preLoaderRoute: typeof WebDevelopmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pos-systems': {
+      id: '/pos-systems'
+      path: '/pos-systems'
+      fullPath: '/pos-systems'
+      preLoaderRoute: typeof PosSystemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hosting': {
+      id: '/hosting'
+      path: '/hosting'
+      fullPath: '/hosting'
+      preLoaderRoute: typeof HostingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/domains': {
+      id: '/domains'
+      path: '/domains'
+      fullPath: '/domains'
+      preLoaderRoute: typeof DomainsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bulk-sms': {
+      id: '/bulk-sms'
+      path: '/bulk-sms'
+      fullPath: '/bulk-sms'
+      preLoaderRoute: typeof BulkSmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,7 +197,23 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BulkSmsRoute: BulkSmsRoute,
+  ContactRoute: ContactRoute,
+  DomainsRoute: DomainsRoute,
+  HostingRoute: HostingRoute,
+  PosSystemsRoute: PosSystemsRoute,
+  PricingRoute: PricingRoute,
+  WebDevelopmentRoute: WebDevelopmentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
