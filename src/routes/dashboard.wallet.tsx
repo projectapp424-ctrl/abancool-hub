@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { Wallet, ArrowDownLeft, ArrowUpRight, Smartphone } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, PanelCard, EmptyState, StatCard, formatKES } from "@/components/dashboard/Shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MpesaPaymentDialog } from "@/components/site/MpesaPaymentDialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/wallet")({
@@ -21,24 +22,27 @@ function WalletPage() {
   const [balance, setBalance] = useState<number | null>(null);
   const [txs, setTxs] = useState<Tx[] | null>(null);
   const [amount, setAmount] = useState("");
+  const [mpesaOpen, setMpesaOpen] = useState(false);
+  const [topupAmount, setTopupAmount] = useState(0);
 
-  useEffect(() => {
+  async function refresh() {
     if (!user) return;
-    void (async () => {
-      const [b, t] = await Promise.all([
-        supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
-        supabase.from("wallet_transactions").select("id, type, amount, description, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
-      ]);
-      setBalance(Number(b.data?.balance ?? 0));
-      setTxs((t.data as Tx[]) ?? []);
-    })();
-  }, [user]);
+    const [b, t] = await Promise.all([
+      supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
+      supabase.from("wallet_transactions").select("id, type, amount, description, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
+    ]);
+    setBalance(Number(b.data?.balance ?? 0));
+    setTxs((t.data as Tx[]) ?? []);
+  }
+
+  useEffect(() => { void refresh(); }, [user]);
 
   function onTopUp(e: React.FormEvent) {
     e.preventDefault();
     const n = Number(amount);
     if (!n || n < 50) { toast.error("Minimum top-up is KES 50."); return; }
-    toast.info("M-Pesa & card top-ups will be enabled in the next phase.");
+    setTopupAmount(n);
+    setMpesaOpen(true);
   }
 
   const credits = (txs ?? []).filter((t) => t.type === "deposit" || t.type === "refund").reduce((s, t) => s + Number(t.amount), 0);
@@ -60,10 +64,9 @@ function WalletPage() {
             <label htmlFor="amt" className="text-xs font-medium">Amount (KES)</label>
             <Input id="amt" type="number" min={50} step={50} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="500" />
           </div>
-          <Button type="submit">Top up via M-Pesa</Button>
-          <Button type="button" variant="outline" onClick={onTopUp}>Top up with card</Button>
+          <Button type="submit"><Smartphone className="mr-1 h-4 w-4" />Top up via M-Pesa</Button>
         </form>
-        <p className="mt-3 text-xs text-muted-foreground">Live payment processing arrives in Phase 3.</p>
+        <p className="mt-3 text-xs text-muted-foreground">Card top-ups arrive in Phase 4.</p>
       </PanelCard>
 
       <PanelCard title="Transaction history" description={txs ? `${txs.length} transaction(s)` : "Loading..."}>
@@ -94,6 +97,17 @@ function WalletPage() {
           </ul>
         )}
       </PanelCard>
+
+      <MpesaPaymentDialog
+        open={mpesaOpen}
+        onOpenChange={setMpesaOpen}
+        amount={topupAmount}
+        purpose="wallet_topup"
+        onSuccess={() => {
+          setAmount("");
+          setTimeout(() => void refresh(), 500);
+        }}
+      />
     </div>
   );
 }
