@@ -10,17 +10,35 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WebDevelopmentRouteImport } from './routes/web-development'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PosSystemsRouteImport } from './routes/pos-systems'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as HostingRouteImport } from './routes/hosting'
 import { Route as DomainsRouteImport } from './routes/domains'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BulkSmsRouteImport } from './routes/bulk-sms'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardWalletRouteImport } from './routes/dashboard.wallet'
+import { Route as DashboardTicketsRouteImport } from './routes/dashboard.tickets'
+import { Route as DashboardSmsRouteImport } from './routes/dashboard.sms'
+import { Route as DashboardServicesRouteImport } from './routes/dashboard.services'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardPosRouteImport } from './routes/dashboard.pos'
+import { Route as DashboardHostingRouteImport } from './routes/dashboard.hosting'
+import { Route as DashboardDomainsRouteImport } from './routes/dashboard.domains'
+import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
 
 const WebDevelopmentRoute = WebDevelopmentRouteImport.update({
   id: '/web-development',
   path: '/web-development',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -33,6 +51,11 @@ const PosSystemsRoute = PosSystemsRouteImport.update({
   path: '/pos-systems',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostingRoute = HostingRouteImport.update({
   id: '/hosting',
   path: '/hosting',
@@ -41,6 +64,11 @@ const HostingRoute = HostingRouteImport.update({
 const DomainsRoute = DomainsRouteImport.update({
   id: '/domains',
   path: '/domains',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -58,16 +86,79 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardWalletRoute = DashboardWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTicketsRoute = DashboardTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSmsRoute = DashboardSmsRouteImport.update({
+  id: '/sms',
+  path: '/sms',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardServicesRoute = DashboardServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPosRoute = DashboardPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardHostingRoute = DashboardHostingRouteImport.update({
+  id: '/hosting',
+  path: '/hosting',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardDomainsRoute = DashboardDomainsRouteImport.update({
+  id: '/domains',
+  path: '/domains',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardBillingRoute = DashboardBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bulk-sms': typeof BulkSmsRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
+  '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/hosting': typeof DashboardHostingRoute
+  '/dashboard/pos': typeof DashboardPosRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/services': typeof DashboardServicesRoute
+  '/dashboard/sms': typeof DashboardSmsRoute
+  '/dashboard/tickets': typeof DashboardTicketsRoute
+  '/dashboard/wallet': typeof DashboardWalletRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,20 +166,45 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
+  '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/hosting': typeof DashboardHostingRoute
+  '/dashboard/pos': typeof DashboardPosRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/services': typeof DashboardServicesRoute
+  '/dashboard/sms': typeof DashboardSmsRoute
+  '/dashboard/tickets': typeof DashboardTicketsRoute
+  '/dashboard/wallet': typeof DashboardWalletRoute
+  '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bulk-sms': typeof BulkSmsRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
+  '/login': typeof LoginRoute
   '/pos-systems': typeof PosSystemsRoute
   '/pricing': typeof PricingRoute
+  '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/domains': typeof DashboardDomainsRoute
+  '/dashboard/hosting': typeof DashboardHostingRoute
+  '/dashboard/pos': typeof DashboardPosRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/services': typeof DashboardServicesRoute
+  '/dashboard/sms': typeof DashboardSmsRoute
+  '/dashboard/tickets': typeof DashboardTicketsRoute
+  '/dashboard/wallet': typeof DashboardWalletRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,11 +212,24 @@ export interface FileRouteTypes {
     | '/'
     | '/bulk-sms'
     | '/contact'
+    | '/dashboard'
     | '/domains'
     | '/hosting'
+    | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/signup'
     | '/web-development'
+    | '/dashboard/billing'
+    | '/dashboard/domains'
+    | '/dashboard/hosting'
+    | '/dashboard/pos'
+    | '/dashboard/profile'
+    | '/dashboard/services'
+    | '/dashboard/sms'
+    | '/dashboard/tickets'
+    | '/dashboard/wallet'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -108,29 +237,57 @@ export interface FileRouteTypes {
     | '/contact'
     | '/domains'
     | '/hosting'
+    | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/signup'
     | '/web-development'
+    | '/dashboard/billing'
+    | '/dashboard/domains'
+    | '/dashboard/hosting'
+    | '/dashboard/pos'
+    | '/dashboard/profile'
+    | '/dashboard/services'
+    | '/dashboard/sms'
+    | '/dashboard/tickets'
+    | '/dashboard/wallet'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/bulk-sms'
     | '/contact'
+    | '/dashboard'
     | '/domains'
     | '/hosting'
+    | '/login'
     | '/pos-systems'
     | '/pricing'
+    | '/signup'
     | '/web-development'
+    | '/dashboard/billing'
+    | '/dashboard/domains'
+    | '/dashboard/hosting'
+    | '/dashboard/pos'
+    | '/dashboard/profile'
+    | '/dashboard/services'
+    | '/dashboard/sms'
+    | '/dashboard/tickets'
+    | '/dashboard/wallet'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BulkSmsRoute: typeof BulkSmsRoute
   ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   DomainsRoute: typeof DomainsRoute
   HostingRoute: typeof HostingRoute
+  LoginRoute: typeof LoginRoute
   PosSystemsRoute: typeof PosSystemsRoute
   PricingRoute: typeof PricingRoute
+  SignupRoute: typeof SignupRoute
   WebDevelopmentRoute: typeof WebDevelopmentRoute
 }
 
@@ -141,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/web-development'
       fullPath: '/web-development'
       preLoaderRoute: typeof WebDevelopmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -157,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosSystemsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hosting': {
       id: '/hosting'
       path: '/hosting'
@@ -169,6 +340,13 @@ declare module '@tanstack/react-router' {
       path: '/domains'
       fullPath: '/domains'
       preLoaderRoute: typeof DomainsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -192,17 +370,120 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/wallet': {
+      id: '/dashboard/wallet'
+      path: '/wallet'
+      fullPath: '/dashboard/wallet'
+      preLoaderRoute: typeof DashboardWalletRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/tickets': {
+      id: '/dashboard/tickets'
+      path: '/tickets'
+      fullPath: '/dashboard/tickets'
+      preLoaderRoute: typeof DashboardTicketsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/sms': {
+      id: '/dashboard/sms'
+      path: '/sms'
+      fullPath: '/dashboard/sms'
+      preLoaderRoute: typeof DashboardSmsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/services': {
+      id: '/dashboard/services'
+      path: '/services'
+      fullPath: '/dashboard/services'
+      preLoaderRoute: typeof DashboardServicesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/pos': {
+      id: '/dashboard/pos'
+      path: '/pos'
+      fullPath: '/dashboard/pos'
+      preLoaderRoute: typeof DashboardPosRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/hosting': {
+      id: '/dashboard/hosting'
+      path: '/hosting'
+      fullPath: '/dashboard/hosting'
+      preLoaderRoute: typeof DashboardHostingRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/domains': {
+      id: '/dashboard/domains'
+      path: '/domains'
+      fullPath: '/dashboard/domains'
+      preLoaderRoute: typeof DashboardDomainsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/billing': {
+      id: '/dashboard/billing'
+      path: '/billing'
+      fullPath: '/dashboard/billing'
+      preLoaderRoute: typeof DashboardBillingRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
+
+interface DashboardRouteChildren {
+  DashboardBillingRoute: typeof DashboardBillingRoute
+  DashboardDomainsRoute: typeof DashboardDomainsRoute
+  DashboardHostingRoute: typeof DashboardHostingRoute
+  DashboardPosRoute: typeof DashboardPosRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardServicesRoute: typeof DashboardServicesRoute
+  DashboardSmsRoute: typeof DashboardSmsRoute
+  DashboardTicketsRoute: typeof DashboardTicketsRoute
+  DashboardWalletRoute: typeof DashboardWalletRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardBillingRoute: DashboardBillingRoute,
+  DashboardDomainsRoute: DashboardDomainsRoute,
+  DashboardHostingRoute: DashboardHostingRoute,
+  DashboardPosRoute: DashboardPosRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
+  DashboardServicesRoute: DashboardServicesRoute,
+  DashboardSmsRoute: DashboardSmsRoute,
+  DashboardTicketsRoute: DashboardTicketsRoute,
+  DashboardWalletRoute: DashboardWalletRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BulkSmsRoute: BulkSmsRoute,
   ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   DomainsRoute: DomainsRoute,
   HostingRoute: HostingRoute,
+  LoginRoute: LoginRoute,
   PosSystemsRoute: PosSystemsRoute,
   PricingRoute: PricingRoute,
+  SignupRoute: SignupRoute,
   WebDevelopmentRoute: WebDevelopmentRoute,
 }
 export const routeTree = rootRouteImport
