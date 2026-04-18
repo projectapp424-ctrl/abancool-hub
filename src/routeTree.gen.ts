@@ -18,6 +18,7 @@ import { Route as HostingRouteImport } from './routes/hosting'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BulkSmsRouteImport } from './routes/bulk-sms'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
@@ -30,6 +31,9 @@ import { Route as DashboardPosRouteImport } from './routes/dashboard.pos'
 import { Route as DashboardHostingRouteImport } from './routes/dashboard.hosting'
 import { Route as DashboardDomainsRouteImport } from './routes/dashboard.domains'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
+import { Route as ApiMpesaStkPushRouteImport } from './routes/api.mpesa.stk-push'
+import { Route as ApiMpesaStatusRouteImport } from './routes/api.mpesa.status'
+import { Route as ApiMpesaCallbackRouteImport } from './routes/api.mpesa.callback'
 
 const WebDevelopmentRoute = WebDevelopmentRouteImport.update({
   id: '/web-development',
@@ -74,6 +78,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BulkSmsRoute = BulkSmsRouteImport.update({
@@ -136,10 +145,26 @@ const DashboardBillingRoute = DashboardBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiMpesaStkPushRoute = ApiMpesaStkPushRouteImport.update({
+  id: '/api/mpesa/stk-push',
+  path: '/api/mpesa/stk-push',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMpesaStatusRoute = ApiMpesaStatusRouteImport.update({
+  id: '/api/mpesa/status',
+  path: '/api/mpesa/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMpesaCallbackRoute = ApiMpesaCallbackRouteImport.update({
+  id: '/api/mpesa/callback',
+  path: '/api/mpesa/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bulk-sms': typeof BulkSmsRoute
+  '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/domains': typeof DomainsRoute
@@ -159,10 +184,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/tickets': typeof DashboardTicketsRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
+  '/api/mpesa/status': typeof ApiMpesaStatusRoute
+  '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bulk-sms': typeof BulkSmsRoute
+  '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/domains': typeof DomainsRoute
   '/hosting': typeof HostingRoute
@@ -181,11 +210,15 @@ export interface FileRoutesByTo {
   '/dashboard/tickets': typeof DashboardTicketsRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
+  '/api/mpesa/status': typeof ApiMpesaStatusRoute
+  '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bulk-sms': typeof BulkSmsRoute
+  '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/domains': typeof DomainsRoute
@@ -205,12 +238,16 @@ export interface FileRoutesById {
   '/dashboard/tickets': typeof DashboardTicketsRoute
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
+  '/api/mpesa/status': typeof ApiMpesaStatusRoute
+  '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/bulk-sms'
+    | '/checkout'
     | '/contact'
     | '/dashboard'
     | '/domains'
@@ -230,10 +267,14 @@ export interface FileRouteTypes {
     | '/dashboard/tickets'
     | '/dashboard/wallet'
     | '/dashboard/'
+    | '/api/mpesa/callback'
+    | '/api/mpesa/status'
+    | '/api/mpesa/stk-push'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/bulk-sms'
+    | '/checkout'
     | '/contact'
     | '/domains'
     | '/hosting'
@@ -252,10 +293,14 @@ export interface FileRouteTypes {
     | '/dashboard/tickets'
     | '/dashboard/wallet'
     | '/dashboard'
+    | '/api/mpesa/callback'
+    | '/api/mpesa/status'
+    | '/api/mpesa/stk-push'
   id:
     | '__root__'
     | '/'
     | '/bulk-sms'
+    | '/checkout'
     | '/contact'
     | '/dashboard'
     | '/domains'
@@ -275,11 +320,15 @@ export interface FileRouteTypes {
     | '/dashboard/tickets'
     | '/dashboard/wallet'
     | '/dashboard/'
+    | '/api/mpesa/callback'
+    | '/api/mpesa/status'
+    | '/api/mpesa/stk-push'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BulkSmsRoute: typeof BulkSmsRoute
+  CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   DomainsRoute: typeof DomainsRoute
@@ -289,6 +338,9 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   SignupRoute: typeof SignupRoute
   WebDevelopmentRoute: typeof WebDevelopmentRoute
+  ApiMpesaCallbackRoute: typeof ApiMpesaCallbackRoute
+  ApiMpesaStatusRoute: typeof ApiMpesaStatusRoute
+  ApiMpesaStkPushRoute: typeof ApiMpesaStkPushRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -354,6 +406,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bulk-sms': {
@@ -440,6 +499,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBillingRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/api/mpesa/stk-push': {
+      id: '/api/mpesa/stk-push'
+      path: '/api/mpesa/stk-push'
+      fullPath: '/api/mpesa/stk-push'
+      preLoaderRoute: typeof ApiMpesaStkPushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mpesa/status': {
+      id: '/api/mpesa/status'
+      path: '/api/mpesa/status'
+      fullPath: '/api/mpesa/status'
+      preLoaderRoute: typeof ApiMpesaStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mpesa/callback': {
+      id: '/api/mpesa/callback'
+      path: '/api/mpesa/callback'
+      fullPath: '/api/mpesa/callback'
+      preLoaderRoute: typeof ApiMpesaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -476,6 +556,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BulkSmsRoute: BulkSmsRoute,
+  CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRouteWithChildren,
   DomainsRoute: DomainsRoute,
@@ -485,7 +566,19 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   SignupRoute: SignupRoute,
   WebDevelopmentRoute: WebDevelopmentRoute,
+  ApiMpesaCallbackRoute: ApiMpesaCallbackRoute,
+  ApiMpesaStatusRoute: ApiMpesaStatusRoute,
+  ApiMpesaStkPushRoute: ApiMpesaStkPushRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
