@@ -1,53 +1,37 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Receipt, Smartphone, Wallet as WalletIcon } from "lucide-react";
+import { Receipt, Loader2, ExternalLink } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, PanelCard, EmptyState, formatKES } from "@/components/dashboard/Shell";
 import { StatusBadge } from "./dashboard.index";
 import { Button } from "@/components/ui/button";
-import { MpesaPaymentDialog } from "@/components/site/MpesaPaymentDialog";
-import { toast } from "sonner";
+import { getMyInvoices, type Invoice } from "@/lib/whmcs.functions";
 
 export const Route = createFileRoute("/dashboard/billing")({
   component: BillingPage,
 });
 
-interface Invoice {
-  id: string; invoice_number: string; status: string; total: number;
-  currency: string; created_at: string; due_at: string | null; paid_at: string | null;
-}
-
 function BillingPage() {
   const { user } = useAuth();
   const [items, setItems] = useState<Invoice[] | null>(null);
-  const [walletBalance, setWalletBalance] = useState<number>(0);
-  const [mpesaOpen, setMpesaOpen] = useState(false);
-  const [active, setActive] = useState<Invoice | null>(null);
+  const [walletBalance, setWalletBalance] = useState(0);
 
-  async function refresh() {
+  useEffect(() => {
     if (!user) return;
-    const [inv, wal] = await Promise.all([
-      supabase.from("invoices")
-        .select("id, invoice_number, status, total, currency, created_at, due_at, paid_at")
-        .eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
-    ]);
-    setItems((inv.data as Invoice[]) ?? []);
-    setWalletBalance(Number(wal.data?.balance ?? 0));
-  }
+    void (async () => {
+      const [inv, wal] = await Promise.all([
+        getMyInvoices().catch(() => ({ invoices: [] })),
+        supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
+      ]);
+      setItems(inv.invoices);
+      setWalletBalance(Number(wal.data?.balance ?? 0));
+    })();
+  }, [user]);
 
-  useEffect(() => { void refresh(); }, [user]);
-
-  const unpaidTotal = (items ?? []).filter((i) => i.status === "unpaid" || i.status === "overdue").reduce((sum, i) => sum + Number(i.total), 0);
-
-  async function payWithWallet(inv: Invoice) {
-    if (walletBalance < Number(inv.total)) { toast.error("Insufficient wallet balance"); return; }
-    const { error } = await supabase.rpc("pay_invoice_with_wallet", { _invoice_id: inv.id });
-    if (error) { toast.error(error.message); return; }
-    toast.success("Invoice paid!");
-    await refresh();
-  }
+  const unpaidTotal = (items ?? [])
+    .filter((i) => /unpaid|overdue/i.test(i.status))
+    .reduce((sum, i) => sum + Number(i.total), 0);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -69,7 +53,9 @@ function BillingPage() {
       </div>
 
       <PanelCard title="Invoices" description={items ? `${items.length} invoice(s)` : "Loading..."}>
-        {items && items.length === 0 ? (
+        {items === null ? (
+          <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+        ) : items.length === 0 ? (
           <EmptyState
             icon={<Receipt className="h-5 w-5" />}
             title="No invoices yet"
@@ -83,31 +69,30 @@ function BillingPage() {
                   <th className="py-3 pr-4 font-medium">Invoice</th>
                   <th className="py-3 pr-4 font-medium">Issued</th>
                   <th className="py-3 pr-4 font-medium">Due</th>
+                  <th className="py-3 pr-4 font-medium">Method</th>
                   <th className="py-3 pr-4 font-medium">Total</th>
                   <th className="py-3 pr-4 font-medium">Status</th>
                   <th className="py-3 pr-4 font-medium text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {(items ?? []).map((i) => {
-                  const owed = i.status === "unpaid" || i.status === "overdue";
+                {items.map((i) => {
+                  const owed = /unpaid|overdue/i.test(i.status);
                   return (
                     <tr key={i.id}>
-                      <td className="py-3 pr-4 font-medium">{i.invoice_number}</td>
-                      <td className="py-3 pr-4">{new Date(i.created_at).toLocaleDateString()}</td>
-                      <td className="py-3 pr-4">{i.due_at ? new Date(i.due_at).toLocaleDateString() : "—"}</td>
+                      <td className="py-3 pr-4 font-medium">{i.invoiceNumber}</td>
+                      <td className="py-3 pr-4">{i.date ? new Date(i.date).toLocaleDateString() : "—"}</td>
+                      <td className="py-3 pr-4">{i.dueDate ? new Date(i.dueDate).toLocaleDateString() : "—"}</td>
+                      <td className="py-3 pr-4 capitalize text-muted-foreground">{i.paymentMethod ?? "—"}</td>
                       <td className="py-3 pr-4 font-semibold">{formatKES(Number(i.total))}</td>
                       <td className="py-3 pr-4"><StatusBadge status={i.status} /></td>
                       <td className="py-3 pr-4 text-right">
                         {owed ? (
-                          <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="outline" onClick={() => void payWithWallet(i)} disabled={walletBalance < Number(i.total)}>
-                              <WalletIcon className="mr-1 h-3 w-3" /> Wallet
-                            </Button>
-                            <Button size="sm" onClick={() => { setActive(i); setMpesaOpen(true); }}>
-                              <Smartphone className="mr-1 h-3 w-3" /> M-Pesa
-                            </Button>
-                          </div>
+                          <Button size="sm" asChild>
+                            <Link to="/contact">
+                              Pay now <ExternalLink className="ml-1 h-3 w-3" />
+                            </Link>
+                          </Button>
                         ) : <span className="text-xs text-muted-foreground">—</span>}
                       </td>
                     </tr>
@@ -118,17 +103,9 @@ function BillingPage() {
           </div>
         )}
       </PanelCard>
-
-      {active && (
-        <MpesaPaymentDialog
-          open={mpesaOpen}
-          onOpenChange={(v) => { setMpesaOpen(v); if (!v) setActive(null); }}
-          amount={Number(active.total)}
-          purpose="invoice"
-          invoiceId={active.id}
-          onSuccess={() => { setTimeout(() => void refresh(), 600); }}
-        />
-      )}
+      <p className="text-xs text-muted-foreground">
+        Online payment (M-Pesa, card) launches with the next release. In the meantime, contact us to settle outstanding invoices.
+      </p>
     </div>
   );
 }
