@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LifeBuoy, Plus } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import { supabase } from "@/integrations/supabase/client";
+import { LifeBuoy, Plus, Loader2, Send } from "lucide-react";
 import { PageHeader, PanelCard, EmptyState } from "@/components/dashboard/Shell";
 import { StatusBadge } from "./dashboard.index";
 import { Button } from "@/components/ui/button";
@@ -11,59 +9,79 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import {
+  getMyTickets,
+  getTicket,
+  openTicket,
+  replyToTicket,
+  type Ticket,
+  type TicketReply,
+} from "@/lib/whmcs.functions";
 
 export const Route = createFileRoute("/dashboard/tickets")({
   component: TicketsPage,
 });
 
-interface Ticket {
-  id: string; ticket_number: string; subject: string; status: string;
-  priority: string; department: string; created_at: string; updated_at: string;
-}
-
 function TicketsPage() {
-  const { user } = useAuth();
   const [items, setItems] = useState<Ticket[] | null>(null);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({ subject: "", message: "", priority: "medium", department: "support" });
+  const [form, setForm] = useState({ subject: "", message: "", priority: "Medium" as "Low" | "Medium" | "High" });
+  const [active, setActive] = useState<Ticket | null>(null);
+  const [replies, setReplies] = useState<TicketReply[]>([]);
+  const [reply, setReply] = useState("");
 
   async function load() {
-    if (!user) return;
-    const { data } = await supabase
-      .from("support_tickets")
-      .select("id, ticket_number, subject, status, priority, department, created_at, updated_at")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false });
-    setItems((data as Ticket[]) ?? []);
+    const r = await getMyTickets().catch(() => ({ tickets: [] }));
+    setItems(r.tickets);
   }
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
+  useEffect(() => { void load(); }, []);
+
+  async function viewTicket(t: Ticket) {
+    setActive(t);
+    setReplies([]);
+    const r = await getTicket({ data: { ticketId: t.id } }).catch(() => ({ ticket: null, replies: [] }));
+    setReplies(r.replies);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!user) return;
-    if (!form.subject.trim() || !form.message.trim()) { toast.error("Subject and message are required."); return; }
+    if (!form.subject.trim() || !form.message.trim()) {
+      toast.error("Subject and message are required.");
+      return;
+    }
     setBusy(true);
-    const { data: t, error } = await supabase
-      .from("support_tickets")
-      .insert({
-        user_id: user.id,
-        subject: form.subject.trim(),
-        priority: form.priority as "low" | "medium" | "high" | "urgent",
-        department: form.department,
-        ticket_number: "",
-      })
-      .select("id").single();
-    if (error || !t) { setBusy(false); toast.error(error?.message ?? "Failed to create ticket."); return; }
-    const { error: msgErr } = await supabase.from("ticket_messages").insert({
-      ticket_id: t.id, author_id: user.id, message: form.message.trim(), is_staff_reply: false,
-    });
-    setBusy(false);
-    if (msgErr) { toast.error(msgErr.message); return; }
-    toast.success("Ticket opened. We'll respond shortly.");
-    setOpen(false);
-    setForm({ subject: "", message: "", priority: "medium", department: "support" });
-    void load();
+    try {
+      await openTicket({
+        data: {
+          subject: form.subject.trim(),
+          message: form.message.trim(),
+          priority: form.priority,
+          department: 1,
+        },
+      });
+      toast.success("Ticket opened. We'll respond shortly.");
+      setOpen(false);
+      setForm({ subject: "", message: "", priority: "Medium" });
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to create ticket");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendReply() {
+    if (!active || !reply.trim()) return;
+    try {
+      await replyToTicket({ data: { ticketId: active.id, message: reply.trim() } });
+      setReply("");
+      toast.success("Reply sent");
+      await viewTicket(active);
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to send reply");
+    }
   }
 
   return (
@@ -81,26 +99,14 @@ function TicketsPage() {
                   <Label htmlFor="subject">Subject</Label>
                   <Input id="subject" maxLength={150} value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="dep">Department</Label>
-                    <select id="dep" className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                      value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}>
-                      <option value="support">Technical Support</option>
-                      <option value="billing">Billing</option>
-                      <option value="sales">Sales</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="prio">Priority</Label>
-                    <select id="prio" className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                      value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="prio">Priority</Label>
+                  <select id="prio" className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value as "Low" | "Medium" | "High" })}>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="msg">Message</Label>
@@ -116,7 +122,9 @@ function TicketsPage() {
       />
 
       <PanelCard title="Your tickets" description={items ? `${items.length} ticket(s)` : "Loading..."}>
-        {items && items.length === 0 ? (
+        {items === null ? (
+          <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+        ) : items.length === 0 ? (
           <EmptyState
             icon={<LifeBuoy className="h-5 w-5" />}
             title="No tickets yet"
@@ -124,12 +132,12 @@ function TicketsPage() {
           />
         ) : (
           <ul className="divide-y divide-border text-sm">
-            {(items ?? []).map((t) => (
-              <li key={t.id} className="flex items-center justify-between py-3">
+            {items.map((t) => (
+              <li key={t.id} className="flex cursor-pointer items-center justify-between py-3 hover:bg-secondary/40" onClick={() => void viewTicket(t)}>
                 <div>
                   <div className="font-medium">{t.subject}</div>
                   <div className="text-xs text-muted-foreground">
-                    {t.ticket_number} · {t.department} · updated {new Date(t.updated_at).toLocaleDateString()}
+                    #{t.tid} · {t.department} · updated {t.lastReply ? new Date(t.lastReply).toLocaleDateString() : new Date(t.date).toLocaleDateString()}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -141,6 +149,43 @@ function TicketsPage() {
           </ul>
         )}
       </PanelCard>
+
+      <Dialog open={!!active} onOpenChange={(v) => { if (!v) setActive(null); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{active?.subject}</DialogTitle>
+          </DialogHeader>
+          {active && (
+            <div className="space-y-4">
+              <div className="text-xs text-muted-foreground">
+                #{active.tid} · {active.department} · {active.priority} · <StatusBadge status={active.status} />
+              </div>
+              <div className="max-h-72 space-y-3 overflow-y-auto rounded-lg border border-border p-3">
+                {replies.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Loading messages…</p>
+                ) : replies.map((m) => (
+                  <div key={m.id} className={"rounded-lg p-3 text-sm " + (m.admin ? "ml-6 bg-primary-soft" : "mr-6 bg-secondary")}>
+                    <div className="mb-1 text-xs font-medium uppercase text-muted-foreground">
+                      {m.admin ? "Staff" : "You"} · {new Date(m.date).toLocaleString()}
+                    </div>
+                    <div className="whitespace-pre-wrap">{m.message}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Your reply</Label>
+                <Textarea rows={3} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Type your reply…" />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setActive(null)}>Close</Button>
+            <Button onClick={() => void sendReply()} disabled={!reply.trim()}>
+              <Send className="mr-1 h-4 w-4" /> Send reply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

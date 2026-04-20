@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, PanelCard, EmptyState, StatCard, formatKES } from "@/components/dashboard/Shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MpesaPaymentDialog } from "@/components/site/MpesaPaymentDialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/wallet")({
@@ -22,14 +21,17 @@ function WalletPage() {
   const [balance, setBalance] = useState<number | null>(null);
   const [txs, setTxs] = useState<Tx[] | null>(null);
   const [amount, setAmount] = useState("");
-  const [mpesaOpen, setMpesaOpen] = useState(false);
-  const [topupAmount, setTopupAmount] = useState(0);
 
   async function refresh() {
     if (!user) return;
     const [b, t] = await Promise.all([
       supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
-      supabase.from("wallet_transactions").select("id, type, amount, description, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
+      supabase
+        .from("wallet_transactions")
+        .select("id, type, amount, description, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50),
     ]);
     setBalance(Number(b.data?.balance ?? 0));
     setTxs((t.data as Tx[]) ?? []);
@@ -41,8 +43,7 @@ function WalletPage() {
     e.preventDefault();
     const n = Number(amount);
     if (!n || n < 50) { toast.error("Minimum top-up is KES 50."); return; }
-    setTopupAmount(n);
-    setMpesaOpen(true);
+    toast.info("Online wallet top-ups launch with the next release. Contact support to add credit manually.");
   }
 
   const credits = (txs ?? []).filter((t) => t.type === "deposit" || t.type === "refund").reduce((s, t) => s + Number(t.amount), 0);
@@ -66,7 +67,7 @@ function WalletPage() {
           </div>
           <Button type="submit"><Smartphone className="mr-1 h-4 w-4" />Top up via M-Pesa</Button>
         </form>
-        <p className="mt-3 text-xs text-muted-foreground">Card top-ups arrive in Phase 4.</p>
+        <p className="mt-3 text-xs text-muted-foreground">Online M-Pesa &amp; card top-ups launch with the next release.</p>
       </PanelCard>
 
       <PanelCard title="Transaction history" description={txs ? `${txs.length} transaction(s)` : "Loading..."}>
@@ -97,17 +98,6 @@ function WalletPage() {
           </ul>
         )}
       </PanelCard>
-
-      <MpesaPaymentDialog
-        open={mpesaOpen}
-        onOpenChange={setMpesaOpen}
-        amount={topupAmount}
-        purpose="wallet_topup"
-        onSuccess={() => {
-          setAmount("");
-          setTimeout(() => void refresh(), 500);
-        }}
-      />
     </div>
   );
 }

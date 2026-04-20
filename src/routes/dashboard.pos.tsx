@@ -1,34 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Store } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import { supabase } from "@/integrations/supabase/client";
+import { Store, Loader2 } from "lucide-react";
 import { PageHeader, PanelCard, EmptyState, formatKES } from "@/components/dashboard/Shell";
 import { StatusBadge } from "./dashboard.index";
 import { Button } from "@/components/ui/button";
+import { getMyServices, type ClientService } from "@/lib/whmcs.functions";
 
 export const Route = createFileRoute("/dashboard/pos")({
   component: PosPage,
 });
 
-interface Sub {
-  id: string; name: string; status: string; billing_cycle: string;
-  price: number; next_renewal_at: string | null;
-}
-
 function PosPage() {
-  const { user } = useAuth();
-  const [items, setItems] = useState<Sub[] | null>(null);
+  const [items, setItems] = useState<ClientService[] | null>(null);
 
   useEffect(() => {
-    if (!user) return;
     void (async () => {
-      const { data } = await supabase
-        .from("services").select("id, name, status, billing_cycle, price, next_renewal_at")
-        .eq("user_id", user.id).eq("type", "pos").order("created_at", { ascending: false });
-      setItems((data as Sub[]) ?? []);
+      const r = await getMyServices().catch(() => ({ services: [] }));
+      setItems(r.services.filter((s) => s.category === "pos"));
     })();
-  }, [user]);
+  }, []);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -39,7 +29,9 @@ function PosPage() {
       />
 
       <PanelCard title="Active subscriptions" description={items ? `${items.length} subscription(s)` : "Loading..."}>
-        {items && items.length === 0 ? (
+        {items === null ? (
+          <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+        ) : items.length === 0 ? (
           <EmptyState
             icon={<Store className="h-5 w-5" />}
             title="No POS subscriptions"
@@ -48,13 +40,13 @@ function PosPage() {
           />
         ) : (
           <ul className="divide-y divide-border text-sm">
-            {(items ?? []).map((s) => (
+            {items.map((s) => (
               <li key={s.id} className="flex items-center justify-between py-3">
                 <div>
                   <div className="font-medium">{s.name}</div>
                   <div className="text-xs capitalize text-muted-foreground">
-                    {s.billing_cycle.replace("_", " ")} · {formatKES(Number(s.price))} ·{" "}
-                    {s.next_renewal_at ? `renews ${new Date(s.next_renewal_at).toLocaleDateString()}` : "no renewal"}
+                    {s.billingCycle} · {formatKES(Number(s.amount))} ·{" "}
+                    {s.nextDueDate ? `renews ${new Date(s.nextDueDate).toLocaleDateString()}` : "no renewal"}
                   </div>
                 </div>
                 <StatusBadge status={s.status} />

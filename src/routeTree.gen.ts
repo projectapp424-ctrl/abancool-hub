@@ -38,16 +38,11 @@ import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTicketsRouteImport } from './routes/admin.tickets'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
-import { Route as AdminProvisioningRouteImport } from './routes/admin.provisioning'
 import { Route as AdminPlansRouteImport } from './routes/admin.plans'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
-import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as ApiSmsSendRouteImport } from './routes/api.sms.send'
-import { Route as ApiProvisioningRunRouteImport } from './routes/api.provisioning.run'
-import { Route as ApiMpesaStkPushRouteImport } from './routes/api.mpesa.stk-push'
-import { Route as ApiMpesaStatusRouteImport } from './routes/api.mpesa.status'
-import { Route as ApiMpesaCallbackRouteImport } from './routes/api.mpesa.callback'
 
 const WebDevelopmentRoute = WebDevelopmentRouteImport.update({
   id: '/web-development',
@@ -194,11 +189,6 @@ const AdminServicesRoute = AdminServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminProvisioningRoute = AdminProvisioningRouteImport.update({
-  id: '/provisioning',
-  path: '/provisioning',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminPlansRoute = AdminPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
@@ -209,39 +199,19 @@ const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAuditRoute = AdminAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
-  getParentRoute: () => AdminRoute,
-} as any)
 const ApiSmsSendRoute = ApiSmsSendRouteImport.update({
   id: '/api/sms/send',
   path: '/api/sms/send',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiProvisioningRunRoute = ApiProvisioningRunRouteImport.update({
-  id: '/api/provisioning/run',
-  path: '/api/provisioning/run',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiMpesaStkPushRoute = ApiMpesaStkPushRouteImport.update({
-  id: '/api/mpesa/stk-push',
-  path: '/api/mpesa/stk-push',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiMpesaStatusRoute = ApiMpesaStatusRouteImport.update({
-  id: '/api/mpesa/status',
-  path: '/api/mpesa/status',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiMpesaCallbackRoute = ApiMpesaCallbackRouteImport.update({
-  id: '/api/mpesa/callback',
-  path: '/api/mpesa/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -261,11 +231,10 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
-  '/admin/audit': typeof AdminAuditRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/plans': typeof AdminPlansRoute
-  '/admin/provisioning': typeof AdminProvisioningRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -280,10 +249,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
-  '/api/mpesa/status': typeof ApiMpesaStatusRoute
-  '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
-  '/api/provisioning/run': typeof ApiProvisioningRunRoute
   '/api/sms/send': typeof ApiSmsSendRoute
 }
 export interface FileRoutesByTo {
@@ -300,11 +265,10 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
-  '/admin/audit': typeof AdminAuditRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/plans': typeof AdminPlansRoute
-  '/admin/provisioning': typeof AdminProvisioningRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -319,10 +283,6 @@ export interface FileRoutesByTo {
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
-  '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
-  '/api/mpesa/status': typeof ApiMpesaStatusRoute
-  '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
-  '/api/provisioning/run': typeof ApiProvisioningRunRoute
   '/api/sms/send': typeof ApiSmsSendRoute
 }
 export interface FileRoutesById {
@@ -342,11 +302,10 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/web-development': typeof WebDevelopmentRoute
-  '/admin/audit': typeof AdminAuditRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/plans': typeof AdminPlansRoute
-  '/admin/provisioning': typeof AdminProvisioningRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -361,10 +320,6 @@ export interface FileRoutesById {
   '/dashboard/wallet': typeof DashboardWalletRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
-  '/api/mpesa/status': typeof ApiMpesaStatusRoute
-  '/api/mpesa/stk-push': typeof ApiMpesaStkPushRoute
-  '/api/provisioning/run': typeof ApiProvisioningRunRoute
   '/api/sms/send': typeof ApiSmsSendRoute
 }
 export interface FileRouteTypes {
@@ -385,11 +340,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/web-development'
-    | '/admin/audit'
     | '/admin/invoices'
+    | '/admin/orders'
     | '/admin/payments'
     | '/admin/plans'
-    | '/admin/provisioning'
     | '/admin/services'
     | '/admin/tickets'
     | '/admin/users'
@@ -404,10 +358,6 @@ export interface FileRouteTypes {
     | '/dashboard/wallet'
     | '/admin/'
     | '/dashboard/'
-    | '/api/mpesa/callback'
-    | '/api/mpesa/status'
-    | '/api/mpesa/stk-push'
-    | '/api/provisioning/run'
     | '/api/sms/send'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -424,11 +374,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/web-development'
-    | '/admin/audit'
     | '/admin/invoices'
+    | '/admin/orders'
     | '/admin/payments'
     | '/admin/plans'
-    | '/admin/provisioning'
     | '/admin/services'
     | '/admin/tickets'
     | '/admin/users'
@@ -443,10 +392,6 @@ export interface FileRouteTypes {
     | '/dashboard/wallet'
     | '/admin'
     | '/dashboard'
-    | '/api/mpesa/callback'
-    | '/api/mpesa/status'
-    | '/api/mpesa/stk-push'
-    | '/api/provisioning/run'
     | '/api/sms/send'
   id:
     | '__root__'
@@ -465,11 +410,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/web-development'
-    | '/admin/audit'
     | '/admin/invoices'
+    | '/admin/orders'
     | '/admin/payments'
     | '/admin/plans'
-    | '/admin/provisioning'
     | '/admin/services'
     | '/admin/tickets'
     | '/admin/users'
@@ -484,10 +428,6 @@ export interface FileRouteTypes {
     | '/dashboard/wallet'
     | '/admin/'
     | '/dashboard/'
-    | '/api/mpesa/callback'
-    | '/api/mpesa/status'
-    | '/api/mpesa/stk-push'
-    | '/api/provisioning/run'
     | '/api/sms/send'
   fileRoutesById: FileRoutesById
 }
@@ -507,10 +447,6 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   WebDevelopmentRoute: typeof WebDevelopmentRoute
-  ApiMpesaCallbackRoute: typeof ApiMpesaCallbackRoute
-  ApiMpesaStatusRoute: typeof ApiMpesaStatusRoute
-  ApiMpesaStkPushRoute: typeof ApiMpesaStkPushRoute
-  ApiProvisioningRunRoute: typeof ApiProvisioningRunRoute
   ApiSmsSendRoute: typeof ApiSmsSendRoute
 }
 
@@ -719,13 +655,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminServicesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/provisioning': {
-      id: '/admin/provisioning'
-      path: '/provisioning'
-      fullPath: '/admin/provisioning'
-      preLoaderRoute: typeof AdminProvisioningRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/plans': {
       id: '/admin/plans'
       path: '/plans'
@@ -740,18 +669,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPaymentsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/invoices': {
       id: '/admin/invoices'
       path: '/invoices'
       fullPath: '/admin/invoices'
       preLoaderRoute: typeof AdminInvoicesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/audit': {
-      id: '/admin/audit'
-      path: '/audit'
-      fullPath: '/admin/audit'
-      preLoaderRoute: typeof AdminAuditRouteImport
       parentRoute: typeof AdminRoute
     }
     '/api/sms/send': {
@@ -761,43 +690,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSmsSendRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/provisioning/run': {
-      id: '/api/provisioning/run'
-      path: '/api/provisioning/run'
-      fullPath: '/api/provisioning/run'
-      preLoaderRoute: typeof ApiProvisioningRunRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/mpesa/stk-push': {
-      id: '/api/mpesa/stk-push'
-      path: '/api/mpesa/stk-push'
-      fullPath: '/api/mpesa/stk-push'
-      preLoaderRoute: typeof ApiMpesaStkPushRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/mpesa/status': {
-      id: '/api/mpesa/status'
-      path: '/api/mpesa/status'
-      fullPath: '/api/mpesa/status'
-      preLoaderRoute: typeof ApiMpesaStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/mpesa/callback': {
-      id: '/api/mpesa/callback'
-      path: '/api/mpesa/callback'
-      fullPath: '/api/mpesa/callback'
-      preLoaderRoute: typeof ApiMpesaCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 interface AdminRouteChildren {
-  AdminAuditRoute: typeof AdminAuditRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminPlansRoute: typeof AdminPlansRoute
-  AdminProvisioningRoute: typeof AdminProvisioningRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminTicketsRoute: typeof AdminTicketsRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -805,11 +705,10 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminAuditRoute: AdminAuditRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminPlansRoute: AdminPlansRoute,
-  AdminProvisioningRoute: AdminProvisioningRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminTicketsRoute: AdminTicketsRoute,
   AdminUsersRoute: AdminUsersRoute,
@@ -864,10 +763,6 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   WebDevelopmentRoute: WebDevelopmentRoute,
-  ApiMpesaCallbackRoute: ApiMpesaCallbackRoute,
-  ApiMpesaStatusRoute: ApiMpesaStatusRoute,
-  ApiMpesaStkPushRoute: ApiMpesaStkPushRoute,
-  ApiProvisioningRunRoute: ApiProvisioningRunRoute,
   ApiSmsSendRoute: ApiSmsSendRoute,
 }
 export const routeTree = rootRouteImport

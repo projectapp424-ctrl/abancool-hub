@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Search, Send } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
+import { Search, Send, Loader2 } from "lucide-react";
 import { PageHeader, PanelCard } from "@/components/dashboard/Shell";
 import { StatusBadge } from "./dashboard.index";
 import { Input } from "@/components/ui/input";
@@ -12,83 +10,55 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { adminGetTickets, adminReplyToTicket, getTicket, type Ticket, type TicketReply } from "@/lib/whmcs.functions";
 
 export const Route = createFileRoute("/admin/tickets")({
   component: AdminTickets,
 });
 
-interface Ticket {
-  id: string;
-  user_id: string;
-  ticket_number: string;
-  subject: string;
-  status: string;
-  priority: string;
-  department: string;
-  created_at: string;
-  updated_at: string;
-}
-interface Msg {
-  id: string;
-  message: string;
-  is_staff_reply: boolean;
-  author_id: string;
-  created_at: string;
+interface AdminTicket extends Ticket {
+  clientName: string;
+  clientId: number;
 }
 
 function AdminTickets() {
-  const { user } = useAuth();
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [tickets, setTickets] = useState<AdminTicket[] | null>(null);
   const [q, setQ] = useState("");
-  const [active, setActive] = useState<Ticket | null>(null);
-  const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [active, setActive] = useState<AdminTicket | null>(null);
+  const [replies, setReplies] = useState<TicketReply[]>([]);
   const [reply, setReply] = useState("");
+  const [status, setStatus] = useState<"Open" | "Answered" | "Customer-Reply" | "Closed" | "In Progress" | "On Hold">("Answered");
 
   async function load() {
-    const { data } = await supabase
-      .from("support_tickets")
-      .select("id, user_id, ticket_number, subject, status, priority, department, created_at, updated_at")
-      .order("updated_at", { ascending: false })
-      .limit(300);
-    setTickets((data as Ticket[]) ?? []);
+    const r = await adminGetTickets().catch(() => ({ tickets: [] }));
+    setTickets(r.tickets as AdminTicket[]);
   }
   useEffect(() => { void load(); }, []);
 
-  async function open(t: Ticket) {
+  async function open(t: AdminTicket) {
     setActive(t);
-    const { data } = await supabase
-      .from("ticket_messages")
-      .select("id, message, is_staff_reply, author_id, created_at")
-      .eq("ticket_id", t.id)
-      .order("created_at");
-    setMsgs((data as Msg[]) ?? []);
-  }
-
-  async function setStatus(s: string) {
-    if (!active) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("support_tickets").update({ status: s as any }).eq("id", active.id);
-    if (error) { toast.error(error.message); return; }
-    setActive({ ...active, status: s });
-    await load();
+    setReplies([]);
+    const r = await getTicket({ data: { ticketId: t.id } }).catch(() => ({ ticket: null, replies: [] }));
+    setReplies(r.replies);
   }
 
   async function send() {
-    if (!active || !user || !reply.trim()) return;
-    const { error } = await supabase.from("ticket_messages").insert({
-      ticket_id: active.id, message: reply.trim(), author_id: user.id, is_staff_reply: true,
-    });
-    if (error) { toast.error(error.message); return; }
-    setReply("");
-    await supabase.from("support_tickets").update({ status: "answered" }).eq("id", active.id);
-    await open(active);
-    await load();
+    if (!active || !reply.trim()) return;
+    try {
+      await adminReplyToTicket({ data: { ticketId: active.id, message: reply.trim(), status } });
+      setReply("");
+      toast.success("Reply sent");
+      await open(active);
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    }
   }
 
-  const filtered = tickets.filter((t) => {
+  const filtered = (tickets ?? []).filter((t) => {
     if (!q) return true;
     const v = q.toLowerCase();
-    return [t.subject, t.ticket_number, t.status, t.priority, t.department].some((x) => String(x).toLowerCase().includes(v));
+    return [t.subject, t.tid, t.status, t.priority, t.department, t.clientName].some((x) => String(x).toLowerCase().includes(v));
   });
 
   return (
@@ -97,83 +67,92 @@ function AdminTickets() {
 
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Search subject, number, status…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+        <Input placeholder="Search subject, customer, status…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
       </div>
 
-      <PanelCard title="Tickets" description={`${filtered.length} of ${tickets.length}`}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <tr className="border-b border-border">
-                <th className="py-3 pr-4 font-medium">Number</th>
-                <th className="py-3 pr-4 font-medium">Subject</th>
-                <th className="py-3 pr-4 font-medium">Department</th>
-                <th className="py-3 pr-4 font-medium">Priority</th>
-                <th className="py-3 pr-4 font-medium">Updated</th>
-                <th className="py-3 pr-4 font-medium">Status</th>
-                <th className="py-3 pr-4 font-medium text-right">Open</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.map((t) => (
-                <tr key={t.id}>
-                  <td className="py-3 pr-4 font-mono text-xs">{t.ticket_number}</td>
-                  <td className="py-3 pr-4 font-medium">{t.subject}</td>
-                  <td className="py-3 pr-4 capitalize text-muted-foreground">{t.department}</td>
-                  <td className="py-3 pr-4 capitalize text-muted-foreground">{t.priority}</td>
-                  <td className="py-3 pr-4 text-xs text-muted-foreground">{new Date(t.updated_at).toLocaleString()}</td>
-                  <td className="py-3 pr-4"><StatusBadge status={t.status} /></td>
-                  <td className="py-3 pr-4 text-right">
-                    <Button size="sm" variant="outline" onClick={() => void open(t)}>View</Button>
-                  </td>
+      <PanelCard title="Tickets" description={tickets ? `${filtered.length} of ${tickets.length}` : "Loading..."}>
+        {tickets === null ? (
+          <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <tr className="border-b border-border">
+                  <th className="py-3 pr-4 font-medium">Number</th>
+                  <th className="py-3 pr-4 font-medium">Subject</th>
+                  <th className="py-3 pr-4 font-medium">Customer</th>
+                  <th className="py-3 pr-4 font-medium">Department</th>
+                  <th className="py-3 pr-4 font-medium">Priority</th>
+                  <th className="py-3 pr-4 font-medium">Updated</th>
+                  <th className="py-3 pr-4 font-medium">Status</th>
+                  <th className="py-3 pr-4 font-medium text-right">Open</th>
                 </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={7} className="py-10 text-center text-sm text-muted-foreground">No tickets match.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.map((t) => (
+                  <tr key={t.id}>
+                    <td className="py-3 pr-4 font-mono text-xs">#{t.tid}</td>
+                    <td className="py-3 pr-4 font-medium">{t.subject}</td>
+                    <td className="py-3 pr-4 text-muted-foreground">{t.clientName || "—"}</td>
+                    <td className="py-3 pr-4 capitalize text-muted-foreground">{t.department}</td>
+                    <td className="py-3 pr-4 capitalize text-muted-foreground">{t.priority}</td>
+                    <td className="py-3 pr-4 text-xs text-muted-foreground">{t.lastReply ? new Date(t.lastReply).toLocaleString() : new Date(t.date).toLocaleString()}</td>
+                    <td className="py-3 pr-4"><StatusBadge status={t.status} /></td>
+                    <td className="py-3 pr-4 text-right">
+                      <Button size="sm" variant="outline" onClick={() => void open(t)}>View</Button>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr><td colSpan={8} className="py-10 text-center text-sm text-muted-foreground">No tickets match.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </PanelCard>
 
       <Dialog open={!!active} onOpenChange={(v) => { if (!v) setActive(null); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between gap-3">
-              <span>{active?.subject}</span>
-              {active && (
-                <Select value={active.status} onValueChange={(v) => void setStatus(v)}>
-                  <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="answered">Answered</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            </DialogTitle>
+            <DialogTitle>{active?.subject}</DialogTitle>
           </DialogHeader>
           {active && (
             <div className="space-y-4">
               <div className="text-xs text-muted-foreground">
-                {active.ticket_number} · {active.department} · {active.priority}
+                #{active.tid} · {active.clientName} · {active.department} · {active.priority}
               </div>
               <div className="max-h-72 space-y-3 overflow-y-auto rounded-lg border border-border p-3">
-                {msgs.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No messages yet.</p>
-                ) : msgs.map((m) => (
-                  <div key={m.id} className={"rounded-lg p-3 text-sm " + (m.is_staff_reply ? "ml-6 bg-primary-soft" : "mr-6 bg-secondary")}>
+                {replies.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Loading messages…</p>
+                ) : replies.map((m) => (
+                  <div key={m.id} className={"rounded-lg p-3 text-sm " + (m.admin ? "ml-6 bg-primary-soft" : "mr-6 bg-secondary")}>
                     <div className="mb-1 text-xs font-medium uppercase text-muted-foreground">
-                      {m.is_staff_reply ? "Staff" : "Customer"} · {new Date(m.created_at).toLocaleString()}
+                      {m.admin ? `Staff (${m.admin})` : "Customer"} · {new Date(m.date).toLocaleString()}
                     </div>
                     <div className="whitespace-pre-wrap">{m.message}</div>
                   </div>
                 ))}
               </div>
-              <div className="space-y-1.5">
-                <Label>Reply as staff</Label>
-                <Textarea rows={3} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Type your reply…" />
+              <div className="grid gap-2 sm:grid-cols-[1fr_180px]">
+                <div className="space-y-1.5">
+                  <Label>Reply</Label>
+                  <Textarea rows={3} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Type your reply…" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>New status</Label>
+                  <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Open">Open</SelectItem>
+                      <SelectItem value="Answered">Answered</SelectItem>
+                      <SelectItem value="Customer-Reply">Customer Reply</SelectItem>
+                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="On Hold">On Hold</SelectItem>
+                      <SelectItem value="Closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           )}
