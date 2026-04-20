@@ -3,13 +3,10 @@ import { ShoppingCart, Trash2, Minus, Plus, ArrowRight } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
-import { useAuth } from "@/lib/auth";
 import { formatKES } from "@/components/dashboard/Shell";
 
 export function CartButton() {
   const { count, open, setOpen } = useCart();
-  const { user } = useAuth();
-  if (!user) return null;
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -58,56 +55,51 @@ function CartContents() {
         <>
           <div className="-mx-6 flex-1 overflow-y-auto px-6">
             <ul className="divide-y divide-border">
-              {items.map((it) => {
-                const name = it.plan?.name ?? it.custom_name ?? "Service";
-                const price = Number(it.plan?.price ?? it.custom_price ?? 0);
-                const cycle = it.plan?.billing_cycle ?? it.custom_billing_cycle ?? "one_time";
-                return (
-                  <li key={it.id} className="py-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium">{name}</div>
-                        {it.domain_name && (
-                          <div className="text-xs text-muted-foreground">{it.domain_name}</div>
-                        )}
-                        <div className="mt-0.5 text-xs capitalize text-muted-foreground">
-                          {formatKES(price)} · {cycle.replace("_", " ")}
-                        </div>
+              {items.map((it) => (
+                <li key={it.id} className="py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium">{it.name}</div>
+                      {it.domain && (
+                        <div className="text-xs text-muted-foreground">{it.domain}</div>
+                      )}
+                      <div className="mt-0.5 text-xs capitalize text-muted-foreground">
+                        {formatKES(it.price)} · {it.billingCycle}
                       </div>
-                      <button
-                        onClick={() => void remove(it.id)}
-                        className="text-muted-foreground hover:text-destructive"
-                        aria-label="Remove"
+                    </div>
+                    <button
+                      onClick={() => remove(it.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label="Remove"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-7 w-7"
+                        onClick={() => setQuantity(it.id, it.quantity - 1)}
+                        disabled={it.quantity <= 1}
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <span className="w-8 text-center text-sm">{it.quantity}</span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-7 w-7"
+                        onClick={() => setQuantity(it.id, it.quantity + 1)}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
                     </div>
-                    <div className="mt-2 flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-7 w-7"
-                          onClick={() => void setQuantity(it.id, it.quantity - 1)}
-                          disabled={it.quantity <= 1}
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="w-8 text-center text-sm">{it.quantity}</span>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-7 w-7"
-                          onClick={() => void setQuantity(it.id, it.quantity + 1)}
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      <div className="text-sm font-semibold">{formatKES(price * it.quantity)}</div>
-                    </div>
-                  </li>
-                );
-              })}
+                    <div className="text-sm font-semibold">{formatKES(it.price * it.quantity)}</div>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
 
