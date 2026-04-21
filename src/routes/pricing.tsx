@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PriceCard } from "@/components/site/PriceCard";
+import { PlanCard } from "@/components/site/PlanCard";
 import { Button } from "@/components/ui/button";
+import { getProducts } from "@/lib/whmcs.functions";
+import type { Product, ProductCategory } from "@/lib/whmcs-types";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -17,78 +20,35 @@ export const Route = createFileRoute("/pricing")({
 });
 
 const tabs = ["Hosting", "POS", "SMS"] as const;
+type Tab = (typeof tabs)[number];
 
-const data: Record<(typeof tabs)[number], Parameters<typeof PriceCard>[0][]> = {
-  Hosting: [
-    {
-      name: "Shared Starter",
-      price: "KSh 299",
-      description: "Personal sites and small landing pages.",
-      features: ["1 Website", "10 GB SSD", "5 Emails", "Free SSL", "DirectAdmin"],
-    },
-    {
-      name: "Business Pro",
-      price: "KSh 899",
-      description: "Growing businesses needing real performance.",
-      features: ["Unlimited sites", "100 GB NVMe", "Unlimited Emails", "Daily backups", "Free domain"],
-      highlighted: true,
-    },
-    {
-      name: "Reseller",
-      price: "KSh 2,499",
-      description: "Sell hosting under your own brand.",
-      features: ["50 cPanel accounts", "200 GB NVMe", "White-label DNS", "Free migrations", "Priority support"],
-    },
-  ],
-  POS: [
-    {
-      name: "Starter",
-      price: "KSh 1,500",
-      description: "One outlet getting started.",
-      features: ["1 Branch", "2 Cashiers", "Unlimited products", "Daily reports", "Email support"],
-    },
-    {
-      name: "Growth",
-      price: "KSh 3,500",
-      description: "Multi-cashier businesses.",
-      features: ["3 Branches", "10 Staff", "Inventory & suppliers", "Advanced reports", "Priority support"],
-      highlighted: true,
-    },
-    {
-      name: "Enterprise",
-      price: "KSh 7,500",
-      description: "Chains and franchises.",
-      features: ["Unlimited branches", "Unlimited staff", "Custom integrations", "Account manager", "On-site training"],
-    },
-  ],
-  SMS: [
-    {
-      name: "Starter Pack",
-      price: "KSh 800",
-      period: "",
-      description: "Testing and small campaigns.",
-      features: ["1,000 credits", "1 Sender ID", "Delivery reports", "CSV upload", "Email support"],
-    },
-    {
-      name: "Business Pack",
-      price: "KSh 3,500",
-      period: "",
-      description: "Regular customer engagement.",
-      features: ["5,000 credits", "3 Sender IDs", "API access", "Priority support", "Delivery reports"],
-      highlighted: true,
-    },
-    {
-      name: "Enterprise Pack",
-      price: "KSh 12,000",
-      period: "",
-      description: "High-volume marketing & transactional.",
-      features: ["20,000 credits", "Unlimited Sender IDs", "Dedicated route", "Account manager", "99.9% SLA"],
-    },
-  ],
-};
+function tabForCategory(category: ProductCategory): Tab | null {
+  if (["hosting", "reseller_hosting", "vps"].includes(category)) return "Hosting";
+  if (category === "pos") return "POS";
+  if (category === "sms") return "SMS";
+  return null;
+}
 
 function PricingPage() {
-  const [active, setActive] = useState<(typeof tabs)[number]>("Hosting");
+  const [active, setActive] = useState<Tab>("Hosting");
+  const [products, setProducts] = useState<Product[] | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const r = await getProducts({ data: { category: "all" } }).catch(() => ({ products: [] }));
+      setProducts(r.products);
+    })();
+  }, []);
+
+  const grouped = useMemo(() => {
+    const base: Record<Tab, Product[]> = { Hosting: [], POS: [], SMS: [] };
+    for (const product of products ?? []) {
+      const tab = tabForCategory(product.category);
+      if (tab) base[tab].push(product);
+    }
+    return base;
+  }, [products]);
+
   return (
     <SiteLayout>
       <PageHero
@@ -116,11 +76,17 @@ function PricingPage() {
             ))}
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {data[active].map((p) => (
-              <PriceCard key={p.name} {...p} />
-            ))}
-          </div>
+          {products === null ? (
+            <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : grouped[active].length === 0 ? (
+            <p className="mt-10 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">No {active.toLowerCase()} packages are currently available.</p>
+          ) : (
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {grouped[active].map((p, i) => (
+                <PlanCard key={p.pid} product={p} highlighted={i === 1} />
+              ))}
+            </div>
+          )}
 
           <div className="mt-16 rounded-2xl border border-border bg-secondary/40 p-8 text-center">
             <h3 className="text-xl font-semibold">Need something custom?</h3>

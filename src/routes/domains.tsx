@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, Globe2, ArrowRightLeft, Settings2, RefreshCw, Loader2, Check, X } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { useNavigate } from "@tanstack/react-router";
 import { formatKES } from "@/components/dashboard/Shell";
+import { getProducts } from "@/lib/whmcs.functions";
+import type { Product } from "@/lib/whmcs-types";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/domains")({
@@ -22,15 +24,15 @@ export const Route = createFileRoute("/domains")({
   component: DomainsPage,
 });
 
-const tlds = [
-  { tld: ".com",    price: 1499 },
-  { tld: ".co.ke",  price: 1200 },
-  { tld: ".africa", price: 2500 },
-  { tld: ".net",    price: 1800 },
-  { tld: ".org",    price: 1800 },
-  { tld: ".io",     price: 6500 },
-  { tld: ".tech",   price: 4500 },
-  { tld: ".store",  price: 3200 },
+const fallbackTlds = [
+  { tld: ".com", price: 1499, pid: 0 },
+  { tld: ".co.ke", price: 1200, pid: 0 },
+  { tld: ".africa", price: 2500, pid: 0 },
+  { tld: ".net", price: 1800, pid: 0 },
+  { tld: ".org", price: 1800, pid: 0 },
+  { tld: ".io", price: 6500, pid: 0 },
+  { tld: ".tech", price: 4500, pid: 0 },
+  { tld: ".store", price: 3200, pid: 0 },
 ];
 
 const features = [
@@ -40,13 +42,36 @@ const features = [
   { icon: RefreshCw, title: "Auto-renew protection", desc: "Never lose a domain to expiry. Renewals handled automatically." },
 ];
 
+type TldPrice = { tld: string; price: number; pid: number };
+
+function domainProductToTld(product: Product): TldPrice | null {
+  const text = `${product.name} ${product.description}`.toLowerCase();
+  const tldMatch = text.match(/\.(?:co\.ke|[a-z]{2,12})\b/);
+  const price = product.pricing.annually > 0 ? product.pricing.annually : product.pricing.onetime;
+  if (!tldMatch || price <= 0) return null;
+  return { tld: tldMatch[0], price, pid: product.pid };
+}
+
 function DomainsPage() {
   const [q, setQ] = useState("");
   const [searched, setSearched] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
-  const { addCustom } = useCart();
+  const [domainProducts, setDomainProducts] = useState<Product[] | null>(null);
+  const { add } = useCart();
   const { user } = useAuth();
   const nav = useNavigate();
+
+  useEffect(() => {
+    void (async () => {
+      const r = await getProducts({ data: { category: "domain" } }).catch(() => ({ products: [] }));
+      setDomainProducts(r.products);
+    })();
+  }, []);
+
+  const tlds = useMemo(() => {
+    const mapped = (domainProducts ?? []).map(domainProductToTld).filter((v): v is TldPrice => Boolean(v));
+    return mapped.length > 0 ? mapped : fallbackTlds;
+  }, [domainProducts]);
 
   function onSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -59,21 +84,25 @@ function DomainsPage() {
     }, 600);
   }
 
-  // Strip TLD from query if user typed one
   const baseName = searched ? (searched.includes(".") ? searched.split(".")[0] : searched) : "";
 
-  async function addDomain(tld: string, price: number) {
+  function addDomain(tld: TldPrice) {
     if (!user) {
       toast.info("Sign in to register a domain");
       void nav({ to: "/login" });
       return;
     }
-    await addCustom({
-      name: `Domain ${tld}`,
-      type: "domain",
-      price,
-      billing_cycle: "annually",
-      domain_name: `${baseName}${tld}`,
+    if (!tld.pid) {
+      toast.info("This extension is not orderable online yet. Please contact sales.");
+      return;
+    }
+    add({
+      pid: tld.pid,
+      name: `Domain ${baseName}${tld.tld}`,
+      price: tld.price,
+      billingCycle: "annually",
+      domain: `${baseName}${tld.tld}`,
+      category: "domain",
     });
   }
 
@@ -107,26 +136,25 @@ function DomainsPage() {
       {searched && (
         <section className="border-b border-border bg-secondary/40 py-12">
           <div className="container-x">
-            <h2 className="text-xl font-bold md:text-2xl">Available extensions for "{baseName}"</h2>
-            <p className="mt-1 text-sm text-muted-foreground">All shown as available — final availability confirmed at checkout.</p>
+            <h2 className="text-xl font-bold md:text-2xl">Available extensions for &quot;{baseName}&quot;</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Availability is confirmed during order processing.</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-2">
               {tlds.map((t) => {
                 const fullName = `${baseName}${t.tld}`;
-                // Mock: pretend .com of "google" is taken
-                const taken = baseName.length < 3 || (baseName === "google" && t.tld === ".com");
+                const unavailable = baseName.length < 3;
                 return (
                   <div key={t.tld} className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]">
                     <div className="flex items-center gap-3">
-                      <span className={"flex h-9 w-9 items-center justify-center rounded-lg " + (taken ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700")}>
-                        {taken ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                      <span className={(unavailable ? "bg-destructive/10 text-destructive" : "bg-primary-soft text-primary") + " flex h-9 w-9 items-center justify-center rounded-lg"}>
+                        {unavailable ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
                       </span>
                       <div>
                         <div className="font-semibold">{fullName}</div>
-                        <div className="text-xs text-muted-foreground">{taken ? "Already registered" : `${formatKES(t.price)}/year`}</div>
+                        <div className="text-xs text-muted-foreground">{unavailable ? "Enter at least 3 characters" : `${formatKES(t.price)}/year`}</div>
                       </div>
                     </div>
-                    {!taken && (
-                      <Button size="sm" onClick={() => void addDomain(t.tld, t.price)}>
+                    {!unavailable && (
+                      <Button size="sm" onClick={() => addDomain(t)}>
                         Add to cart
                       </Button>
                     )}
@@ -141,15 +169,19 @@ function DomainsPage() {
       <section className="py-20">
         <div className="container-x">
           <h2 className="text-2xl font-bold md:text-3xl">Popular extensions</h2>
-          <p className="mt-2 text-muted-foreground">Transparent pricing. No hidden renewal hikes.</p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {tlds.map((t) => (
-              <div key={t.tld} className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
-                <span className="text-lg font-semibold text-primary">{t.tld}</span>
-                <span className="text-sm font-medium text-foreground">{formatKES(t.price)}<span className="text-muted-foreground">/yr</span></span>
-              </div>
-            ))}
-          </div>
+          <p className="mt-2 text-muted-foreground">Transparent pricing from the live catalog.</p>
+          {domainProducts === null ? (
+            <div className="mt-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {tlds.map((t) => (
+                <div key={t.tld} className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+                  <span className="text-lg font-semibold text-primary">{t.tld}</span>
+                  <span className="text-sm font-medium text-foreground">{formatKES(t.price)}<span className="text-muted-foreground">/yr</span></span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
