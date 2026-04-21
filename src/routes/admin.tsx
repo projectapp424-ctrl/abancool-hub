@@ -1,8 +1,8 @@
-import { createFileRoute, Outlet, Link, useNavigate, useRouterState, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ComponentType } from "react";
 import {
   LayoutDashboard, Users2, Server, Receipt, CreditCard, Package, LifeBuoy,
-  History, Cloud, Menu, Loader2, ShieldCheck, LogOut, ArrowLeft, Workflow,
+  Cloud, Menu, Loader2, ShieldCheck, LogOut, ArrowLeft, ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/admin")({
 type AdminRoute =
   | "/admin" | "/admin/users" | "/admin/services" | "/admin/invoices"
   | "/admin/payments" | "/admin/plans" | "/admin/tickets"
-  | "/admin/provisioning" | "/admin/audit";
+  | "/admin/orders";
 
 const navMain: { to: AdminRoute; label: string; icon: ComponentType<{ className?: string }> }[] = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard },
@@ -35,14 +35,13 @@ const navMain: { to: AdminRoute; label: string; icon: ComponentType<{ className?
   { to: "/admin/services", label: "Services", icon: Server },
 ];
 const navBilling: { to: AdminRoute; label: string; icon: ComponentType<{ className?: string }> }[] = [
+  { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/invoices", label: "Invoices", icon: Receipt },
   { to: "/admin/payments", label: "Payments", icon: CreditCard },
 ];
 const navOps: { to: AdminRoute; label: string; icon: ComponentType<{ className?: string }> }[] = [
   { to: "/admin/plans", label: "Plans catalog", icon: Package },
-  { to: "/admin/provisioning", label: "Provisioning", icon: Workflow },
   { to: "/admin/tickets", label: "Tickets", icon: LifeBuoy },
-  { to: "/admin/audit", label: "Audit log", icon: History },
 ];
 
 function AdminLayout() {

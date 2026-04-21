@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MessageSquare, Users, BarChart3, Tag, Upload, Send, Loader2 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PlanCard } from "@/routes/hosting";
-import { supabase } from "@/integrations/supabase/client";
+import { PlanCard } from "@/components/site/PlanCard";
+import { getProducts } from "@/lib/whmcs.functions";
+import type { Product } from "@/lib/whmcs-types";
 
 export const Route = createFileRoute("/bulk-sms")({
   head: () => ({
@@ -17,11 +18,6 @@ export const Route = createFileRoute("/bulk-sms")({
   component: SmsPage,
 });
 
-interface Plan {
-  id: string; slug: string; name: string; tagline: string | null;
-  price: number; billing_cycle: string; features: string[]; sort_order: number;
-}
-
 const features = [
   { icon: Send, title: "Send instantly", desc: "Schedule or fire campaigns to thousands of contacts in seconds." },
   { icon: Tag, title: "Branded sender IDs", desc: "Replace the number with your business name for higher trust." },
@@ -32,17 +28,12 @@ const features = [
 ];
 
 function SmsPage() {
-  const [plans, setPlans] = useState<Plan[] | null>(null);
+  const [plans, setPlans] = useState<Product[] | null>(null);
 
   useEffect(() => {
     void (async () => {
-      const { data } = await supabase
-        .from("plans")
-        .select("id, slug, name, tagline, price, billing_cycle, features, sort_order")
-        .eq("type", "sms")
-        .eq("is_active", true)
-        .order("sort_order");
-      setPlans((data as unknown as Plan[]) ?? []);
+      const r = await getProducts({ data: { category: "sms" } }).catch(() => ({ products: [] }));
+      setPlans(r.products);
     })();
   }, []);
 
@@ -77,9 +68,11 @@ function SmsPage() {
           <p className="mt-2 text-muted-foreground">Buy credits once. Use them whenever you need.</p>
           {plans === null ? (
             <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : plans.length === 0 ? (
+            <p className="mt-8 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">No SMS packages are currently available.</p>
           ) : (
             <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {plans.map((p, i) => <PlanCard key={p.id} plan={p} highlighted={i === 1} />)}
+              {plans.map((p, i) => <PlanCard key={p.pid} product={p} highlighted={i === 1} />)}
             </div>
           )}
         </div>

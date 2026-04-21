@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
+import { linkOrCreateWhmcsClient } from "@/lib/whmcs.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/signup")({
@@ -45,6 +46,19 @@ function SignupPage() {
     }
     setBusy(true);
     const { error } = await signUp({ ...form, email: form.email.trim() });
+    if (!error) {
+      await linkOrCreateWhmcsClient({
+        data: {
+          firstName: form.first_name,
+          lastName: form.last_name,
+          email: form.email.trim(),
+          phone: form.phone || undefined,
+          companyName: form.company || undefined,
+          country: form.country || "KE",
+          password: form.password,
+        },
+      }).catch(() => null);
+    }
     setBusy(false);
     if (error) toast.error(error);
     else {

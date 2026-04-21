@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
+import { prepareExternalLogin } from "@/lib/whmcs.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
@@ -23,6 +24,7 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState<"lovable" | "billing">("lovable");
 
   useEffect(() => {
     if (!loading && user) void nav({ to: "/dashboard" });
@@ -35,6 +37,14 @@ function LoginPage() {
       return;
     }
     setBusy(true);
+    if (mode === "billing") {
+      const prepared = await prepareExternalLogin({ data: { email: email.trim(), password } });
+      if (!prepared.ok) {
+        setBusy(false);
+        toast.error(prepared.message);
+        return;
+      }
+    }
     const { error } = await signIn(email.trim(), password);
     setBusy(false);
     if (error) toast.error(error);
@@ -63,6 +73,22 @@ function LoginPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               Manage your services, billing and tickets.
             </p>
+            <div className="mt-6 grid grid-cols-2 rounded-xl border border-border bg-secondary/50 p-1">
+              <button
+                type="button"
+                onClick={() => setMode("lovable")}
+                className={(mode === "lovable" ? "bg-background text-foreground shadow-[var(--shadow-soft)]" : "text-muted-foreground") + " rounded-lg px-3 py-2 text-sm font-medium transition"}
+              >
+                Lovable account
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("billing")}
+                className={(mode === "billing" ? "bg-background text-foreground shadow-[var(--shadow-soft)]" : "text-muted-foreground") + " rounded-lg px-3 py-2 text-sm font-medium transition"}
+              >
+                Billing account
+              </button>
+            </div>
             <form onSubmit={onSubmit} className="mt-6 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>

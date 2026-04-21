@@ -263,6 +263,41 @@ export const validateExternalLogin = createServerFn({ method: "POST" })
     }
   });
 
+export const prepareExternalLogin = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      email: z.string().email(),
+      password: z.string().min(1).max(200),
+    }).parse,
+  )
+  .handler(async ({ data }): Promise<{ ok: true } | { ok: false; message: string }> => {
+    const valid = await validateExternalLogin({ data });
+    if (!valid.ok) return valid;
+
+    const email = data.email.trim().toLowerCase();
+    const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const existing = users.users.find((u) => u.email?.toLowerCase() === email);
+    const userId = existing?.id ?? (await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: data.password,
+      email_confirm: true,
+      user_metadata: { first_name: valid.firstName, last_name: valid.lastName },
+    })).data.user?.id;
+
+    if (!userId) return { ok: false, message: "Could not prepare your account" };
+    if (existing) await supabaseAdmin.auth.admin.updateUserById(userId, { password: data.password });
+
+    await supabaseAdmin.from("profiles").upsert({
+      id: userId,
+      first_name: valid.firstName || null,
+      last_name: valid.lastName || null,
+      whmcs_client_id: valid.clientId,
+      whmcs_synced_at: new Date().toISOString(),
+    });
+
+    return { ok: true };
+  });
+
 // ---------- CLIENT-FACING ----------
 
 export const getMyServices = createServerFn({ method: "GET" })

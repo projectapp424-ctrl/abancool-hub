@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Store, Utensils, Wine, Pill, BarChart3, Users, Boxes, Receipt, Loader2 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PlanCard } from "@/routes/hosting";
-import { supabase } from "@/integrations/supabase/client";
+import { PlanCard } from "@/components/site/PlanCard";
+import { getProducts } from "@/lib/whmcs.functions";
+import type { Product } from "@/lib/whmcs-types";
 
 export const Route = createFileRoute("/pos-systems")({
   head: () => ({
@@ -16,11 +17,6 @@ export const Route = createFileRoute("/pos-systems")({
   }),
   component: PosPage,
 });
-
-interface Plan {
-  id: string; slug: string; name: string; tagline: string | null;
-  price: number; billing_cycle: string; features: string[]; sort_order: number;
-}
 
 const verticals = [
   { icon: Store, title: "Retail POS", desc: "Barcode scanning, multi-branch stock, supplier management." },
@@ -37,17 +33,12 @@ const benefits = [
 ];
 
 function PosPage() {
-  const [plans, setPlans] = useState<Plan[] | null>(null);
+  const [plans, setPlans] = useState<Product[] | null>(null);
 
   useEffect(() => {
     void (async () => {
-      const { data } = await supabase
-        .from("plans")
-        .select("id, slug, name, tagline, price, billing_cycle, features, sort_order")
-        .eq("type", "pos")
-        .eq("is_active", true)
-        .order("sort_order");
-      setPlans((data as unknown as Plan[]) ?? []);
+      const r = await getProducts({ data: { category: "pos" } }).catch(() => ({ products: [] }));
+      setPlans(r.products);
     })();
   }, []);
 
@@ -96,12 +87,14 @@ function PosPage() {
       <section className="py-20">
         <div className="container-x">
           <h2 className="text-2xl font-bold md:text-3xl">POS subscription plans</h2>
-          <p className="mt-2 text-muted-foreground">Per outlet, billed monthly. Cancel anytime.</p>
+          <p className="mt-2 text-muted-foreground">Per outlet, billed from the live catalog.</p>
           {plans === null ? (
             <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : plans.length === 0 ? (
+            <p className="mt-8 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">No POS subscriptions are currently available.</p>
           ) : (
             <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {plans.map((p, i) => <PlanCard key={p.id} plan={p} highlighted={i === 0} />)}
+              {plans.map((p, i) => <PlanCard key={p.pid} product={p} highlighted={i === 0} />)}
             </div>
           )}
         </div>
