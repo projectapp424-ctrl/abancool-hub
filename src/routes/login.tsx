@@ -24,7 +24,7 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [mode, setMode] = useState<"lovable" | "billing">("lovable");
+  const [mode, setMode] = useState<"client" | "billing">("client");
 
   useEffect(() => {
     if (!loading && user) void nav({ to: "/dashboard" });
@@ -76,10 +76,10 @@ function LoginPage() {
             <div className="mt-6 grid grid-cols-2 rounded-xl border border-border bg-secondary/50 p-1">
               <button
                 type="button"
-                onClick={() => setMode("lovable")}
-                className={(mode === "lovable" ? "bg-background text-foreground shadow-[var(--shadow-soft)]" : "text-muted-foreground") + " rounded-lg px-3 py-2 text-sm font-medium transition"}
+                onClick={() => setMode("client")}
+                className={(mode === "client" ? "bg-background text-foreground shadow-[var(--shadow-soft)]" : "text-muted-foreground") + " rounded-lg px-3 py-2 text-sm font-medium transition"}
               >
-                Lovable account
+                Client area
               </button>
               <button
                 type="button"
