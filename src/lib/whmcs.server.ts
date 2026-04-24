@@ -50,8 +50,8 @@ export async function whmcsCall<T extends WhmcsResponse = WhmcsResponse>(
   const cfg = getConfig();
   const body = new URLSearchParams();
   body.set("action", action);
-  body.set("username", cfg.identifier);
-  body.set("password", cfg.secret);
+  body.set("identifier", cfg.identifier);
+  body.set("secret", cfg.secret);
   body.set("responsetype", "json");
   for (const [k, v] of Object.entries(params)) {
     if (v === undefined || v === null) continue;
