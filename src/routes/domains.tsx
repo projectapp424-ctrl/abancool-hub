@@ -1,16 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Search, Globe2, ArrowRightLeft, Settings2, RefreshCw, Loader2, Check, X } from "lucide-react";
+import { useState } from "react";
+import { Search, Globe2, ArrowRightLeft, Settings2, RefreshCw, ExternalLink } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/lib/cart";
-import { useAuth } from "@/lib/auth";
-import { useNavigate } from "@tanstack/react-router";
-import { formatKES } from "@/components/dashboard/Shell";
-import { getProducts } from "@/lib/whmcs.functions";
-import type { Product } from "@/lib/whmcs-types";
-import { toast } from "sonner";
+import { WHMCS_DOMAINS_URL, WHMCS_DOMAIN_TRANSFER_URL, WHMCS_BASE } from "@/lib/whmcs-public";
 
 export const Route = createFileRoute("/domains")({
   head: () => ({
@@ -24,15 +18,15 @@ export const Route = createFileRoute("/domains")({
   component: DomainsPage,
 });
 
-const fallbackTlds = [
-  { tld: ".com", price: 1499, pid: 0 },
-  { tld: ".co.ke", price: 1200, pid: 0 },
-  { tld: ".africa", price: 2500, pid: 0 },
-  { tld: ".net", price: 1800, pid: 0 },
-  { tld: ".org", price: 1800, pid: 0 },
-  { tld: ".io", price: 6500, pid: 0 },
-  { tld: ".tech", price: 4500, pid: 0 },
-  { tld: ".store", price: 3200, pid: 0 },
+const popularTlds = [
+  { tld: ".com", price: "KES 1,499/yr" },
+  { tld: ".co.ke", price: "KES 1,200/yr" },
+  { tld: ".africa", price: "KES 2,500/yr" },
+  { tld: ".net", price: "KES 1,800/yr" },
+  { tld: ".org", price: "KES 1,800/yr" },
+  { tld: ".io", price: "KES 6,500/yr" },
+  { tld: ".tech", price: "KES 4,500/yr" },
+  { tld: ".store", price: "KES 3,200/yr" },
 ];
 
 const features = [
@@ -42,68 +36,16 @@ const features = [
   { icon: RefreshCw, title: "Auto-renew protection", desc: "Never lose a domain to expiry. Renewals handled automatically." },
 ];
 
-type TldPrice = { tld: string; price: number; pid: number };
-
-function domainProductToTld(product: Product): TldPrice | null {
-  const text = `${product.name} ${product.description}`.toLowerCase();
-  const tldMatch = text.match(/\.(?:co\.ke|[a-z]{2,12})\b/);
-  const price = product.pricing.annually > 0 ? product.pricing.annually : product.pricing.onetime;
-  if (!tldMatch || price <= 0) return null;
-  return { tld: tldMatch[0], price, pid: product.pid };
-}
-
 function DomainsPage() {
   const [q, setQ] = useState("");
-  const [searched, setSearched] = useState<string | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [domainProducts, setDomainProducts] = useState<Product[] | null>(null);
-  const { add } = useCart();
-  const { user } = useAuth();
-  const nav = useNavigate();
-
-  useEffect(() => {
-    void (async () => {
-      const r = await getProducts({ data: { category: "domain" } }).catch(() => ({ products: [] }));
-      setDomainProducts(r.products);
-    })();
-  }, []);
-
-  const tlds = useMemo(() => {
-    const mapped = (domainProducts ?? []).map(domainProductToTld).filter((v): v is TldPrice => Boolean(v));
-    return mapped.length > 0 ? mapped : fallbackTlds;
-  }, [domainProducts]);
 
   function onSearch(e: React.FormEvent) {
     e.preventDefault();
     const cleaned = q.trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0];
-    if (!cleaned) { toast.error("Enter a domain to search"); return; }
-    setSearching(true);
-    setTimeout(() => {
-      setSearched(cleaned);
-      setSearching(false);
-    }, 600);
-  }
-
-  const baseName = searched ? (searched.includes(".") ? searched.split(".")[0] : searched) : "";
-
-  function addDomain(tld: TldPrice) {
-    if (!user) {
-      toast.info("Sign in to register a domain");
-      void nav({ to: "/login" });
-      return;
-    }
-    if (!tld.pid) {
-      toast.info("This extension is not orderable online yet. Please contact sales.");
-      return;
-    }
-    add({
-      pid: tld.pid,
-      name: `Domain ${baseName}${tld.tld}`,
-      price: tld.price,
-      billingCycle: "annually",
-      domain: `${baseName}${tld.tld}`,
-      category: "domain",
-    });
+    const target = cleaned
+      ? `${WHMCS_BASE}?rp=/domain/register&query=${encodeURIComponent(cleaned)}`
+      : WHMCS_DOMAINS_URL;
+    window.open(target, "_blank", "noopener,noreferrer");
   }
 
   return (
@@ -122,66 +64,50 @@ function DomainsPage() {
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="yourbusiness"
+              placeholder="yourbusiness.com"
               className="h-12 border-white/10 bg-white/10 pl-10 text-white placeholder:text-white/50"
             />
           </div>
-          <Button type="submit" size="lg" className="h-12 px-6" disabled={searching}>
-            {searching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Search
+          <Button type="submit" size="lg" className="h-12 px-6">
+            Search <ExternalLink className="ml-2 h-4 w-4" />
           </Button>
         </form>
       </PageHero>
 
-      {searched && (
-        <section className="border-b border-border bg-secondary/40 py-12">
-          <div className="container-x">
-            <h2 className="text-xl font-bold md:text-2xl">Available extensions for &quot;{baseName}&quot;</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Availability is confirmed during order processing.</p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-2">
-              {tlds.map((t) => {
-                const fullName = `${baseName}${t.tld}`;
-                const unavailable = baseName.length < 3;
-                return (
-                  <div key={t.tld} className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]">
-                    <div className="flex items-center gap-3">
-                      <span className={(unavailable ? "bg-destructive/10 text-destructive" : "bg-primary-soft text-primary") + " flex h-9 w-9 items-center justify-center rounded-lg"}>
-                        {unavailable ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-                      </span>
-                      <div>
-                        <div className="font-semibold">{fullName}</div>
-                        <div className="text-xs text-muted-foreground">{unavailable ? "Enter at least 3 characters" : `${formatKES(t.price)}/year`}</div>
-                      </div>
-                    </div>
-                    {!unavailable && (
-                      <Button size="sm" onClick={() => addDomain(t)}>
-                        Add to cart
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
       <section className="py-20">
         <div className="container-x">
-          <h2 className="text-2xl font-bold md:text-3xl">Popular extensions</h2>
-          <p className="mt-2 text-muted-foreground">Transparent pricing from the live catalog.</p>
-          {domainProducts === null ? (
-            <div className="mt-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : (
-            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {tlds.map((t) => (
-                <div key={t.tld} className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
-                  <span className="text-lg font-semibold text-primary">{t.tld}</span>
-                  <span className="text-sm font-medium text-foreground">{formatKES(t.price)}<span className="text-muted-foreground">/yr</span></span>
-                </div>
-              ))}
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold md:text-3xl">Popular extensions</h2>
+              <p className="mt-2 text-muted-foreground">Indicative pricing — confirm during checkout.</p>
             </div>
-          )}
+            <div className="flex gap-2">
+              <Button variant="outline" asChild>
+                <a href={WHMCS_DOMAIN_TRANSFER_URL} target="_blank" rel="noopener noreferrer">
+                  Transfer a domain <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+              <Button asChild>
+                <a href={WHMCS_DOMAINS_URL} target="_blank" rel="noopener noreferrer">
+                  Register new domain <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {popularTlds.map((t) => (
+              <a
+                key={t.tld}
+                href={WHMCS_DOMAINS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] transition hover:border-primary"
+              >
+                <span className="text-lg font-semibold text-primary">{t.tld}</span>
+                <span className="text-sm font-medium text-foreground">{t.price}</span>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 

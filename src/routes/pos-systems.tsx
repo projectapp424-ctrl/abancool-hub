@@ -1,10 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Store, Utensils, Wine, Pill, BarChart3, Users, Boxes, Receipt, Loader2 } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Store, Utensils, Wine, Pill, BarChart3, Users, Boxes, Receipt } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PlanCard } from "@/components/site/PlanCard";
-import { getProducts } from "@/lib/whmcs.functions";
-import type { Product } from "@/lib/whmcs-types";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/pos-systems")({
   head: () => ({
@@ -33,15 +30,6 @@ const benefits = [
 ];
 
 function PosPage() {
-  const [plans, setPlans] = useState<Product[] | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      const r = await getProducts({ data: { category: "pos" } }).catch(() => ({ products: [] }));
-      setPlans(r.products);
-    })();
-  }, []);
-
   return (
     <SiteLayout>
       <PageHero
@@ -85,18 +73,12 @@ function PosPage() {
       </section>
 
       <section className="py-20">
-        <div className="container-x">
-          <h2 className="text-2xl font-bold md:text-3xl">POS subscription plans</h2>
-          <p className="mt-2 text-muted-foreground">Per outlet, billed from the live catalog.</p>
-          {plans === null ? (
-            <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : plans.length === 0 ? (
-            <p className="mt-8 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">No POS subscriptions are currently available.</p>
-          ) : (
-            <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {plans.map((p, i) => <PlanCard key={p.pid} product={p} highlighted={i === 0} />)}
-            </div>
-          )}
+        <div className="container-x rounded-2xl border border-border bg-card p-10 text-center shadow-[var(--shadow-soft)]">
+          <h2 className="text-2xl font-bold md:text-3xl">Ready to deploy POS at your outlet?</h2>
+          <p className="mt-2 text-muted-foreground">Talk to our team for tailored pricing per industry and outlet count.</p>
+          <Button className="mt-6" asChild>
+            <Link to="/contact">Contact sales</Link>
+          </Button>
         </div>
       </section>
     </SiteLayout>

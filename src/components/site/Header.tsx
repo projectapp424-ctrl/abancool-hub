@@ -4,6 +4,7 @@ import { Menu, X, Cloud, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { CartButton } from "@/components/site/CartDrawer";
+import { WHMCS_HOME_URL, WHMCS_LOGIN_URL } from "@/lib/whmcs-public";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -55,10 +56,10 @@ export function Header() {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">Sign in</Link>
+                <a href={WHMCS_LOGIN_URL} target="_blank" rel="noopener noreferrer">Sign in</a>
               </Button>
               <Button size="sm" asChild>
-                <Link to="/signup">Get Started</Link>
+                <a href={WHMCS_HOME_URL} target="_blank" rel="noopener noreferrer">Get Started</a>
               </Button>
             </>
           )}
@@ -99,10 +100,10 @@ export function Header() {
               ) : (
                 <>
                   <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <Link to="/login">Sign in</Link>
+                    <a href={WHMCS_LOGIN_URL} target="_blank" rel="noopener noreferrer">Sign in</a>
                   </Button>
                   <Button size="sm" className="flex-1" asChild>
-                    <Link to="/signup">Get Started</Link>
+                    <a href={WHMCS_HOME_URL} target="_blank" rel="noopener noreferrer">Get Started</a>
                   </Button>
                 </>
               )}

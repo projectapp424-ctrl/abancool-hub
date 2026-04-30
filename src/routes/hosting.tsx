@@ -1,16 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Server, Cpu, HardDrive, Database, Mail, ShieldCheck, Loader2 } from "lucide-react";
+import { Server, Cpu, HardDrive, Database, Mail, ShieldCheck } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PlanCard } from "@/components/site/PlanCard";
-import { getProducts } from "@/lib/whmcs.functions";
-import type { Product } from "@/lib/whmcs-types";
+import { ExternalPlanCard } from "@/components/site/ExternalPlanCard";
+import { SHARED_HOSTING, RESELLER_HOSTING, ABAN_HOSTING } from "@/lib/whmcs-public";
 
 export const Route = createFileRoute("/hosting")({
   head: () => ({
     meta: [
-      { title: "Web Hosting — Shared, Reseller, VPS & Dedicated | Abancool" },
-      { name: "description", content: "Fast SSD hosting with free SSL, daily backups, DirectAdmin control panel and 99.9% uptime SLA." },
+      { title: "Web Hosting — Shared, Reseller & Aban Hosting | Abancool" },
+      { name: "description", content: "Fast SSD hosting with free SSL, daily backups, cPanel and 99.9% uptime SLA. Order in seconds." },
       { property: "og:title", content: "Web Hosting | Abancool Technology" },
       { property: "og:description", content: "Reliable hosting plans engineered for speed, security and scale." },
     ],
@@ -19,49 +17,50 @@ export const Route = createFileRoute("/hosting")({
 });
 
 const features = [
-  { icon: Server, title: "DirectAdmin panel", desc: "Industry-standard control panel for managing every aspect of your hosting." },
+  { icon: Server, title: "cPanel control panel", desc: "Industry-standard panel for managing every aspect of your hosting." },
   { icon: HardDrive, title: "NVMe SSD storage", desc: "Up to 20× faster than traditional drives. Pages load before users blink." },
   { icon: Database, title: "Unlimited databases", desc: "MySQL/MariaDB databases with phpMyAdmin and remote access support." },
   { icon: Mail, title: "Branded email", desc: "Professional email addresses on your own domain with webmail and IMAP." },
   { icon: ShieldCheck, title: "Free SSL & backups", desc: "Let's Encrypt SSL on every domain plus automatic daily backups." },
-  { icon: Cpu, title: "LiteSpeed & caching", desc: "LSCache and Memcached come pre-tuned for WordPress and Laravel." },
+  { icon: Cpu, title: "LiteSpeed & caching", desc: "LiteSpeed comes pre-tuned for WordPress and Laravel." },
 ];
 
 function HostingPage() {
-  const [plans, setPlans] = useState<Product[] | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      const [hosting, reseller, vps] = await Promise.all([
-        getProducts({ data: { category: "hosting" } }).catch(() => ({ products: [] })),
-        getProducts({ data: { category: "reseller_hosting" } }).catch(() => ({ products: [] })),
-        getProducts({ data: { category: "vps" } }).catch(() => ({ products: [] })),
-      ]);
-      setPlans([...hosting.products, ...reseller.products, ...vps.products]);
-    })();
-  }, []);
-
   return (
     <SiteLayout>
       <PageHero
         eyebrow="Hosting"
         title="Web hosting that scales with your business."
-        subtitle="From your first WordPress site to enterprise applications — choose a plan and we'll provision it automatically."
+        subtitle="From your first WordPress site to enterprise applications — pick a plan and we'll provision it automatically."
       />
 
       <section className="py-20">
         <div className="container-x">
-          <h2 className="text-2xl font-bold md:text-3xl">Hosting plans</h2>
-          <p className="mt-2 text-muted-foreground">Live packages from our billing catalog.</p>
-          {plans === null ? (
-            <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : plans.length === 0 ? (
-            <p className="mt-8 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">No hosting packages are currently available.</p>
-          ) : (
-            <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {plans.map((p, i) => <PlanCard key={p.pid} product={p} highlighted={i === 1} />)}
-            </div>
-          )}
+          <h2 className="text-2xl font-bold md:text-3xl">Shared Hosting</h2>
+          <p className="mt-2 text-muted-foreground">Fast, reliable hosting for blogs, business sites and online stores.</p>
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {SHARED_HOSTING.map((p) => <ExternalPlanCard key={p.pid} pkg={p} />)}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border bg-secondary/40 py-20">
+        <div className="container-x">
+          <h2 className="text-2xl font-bold md:text-3xl">Reseller Hosting</h2>
+          <p className="mt-2 text-muted-foreground">Start your own hosting brand with WHM and per-account cPanel access.</p>
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {RESELLER_HOSTING.map((p) => <ExternalPlanCard key={p.pid} pkg={p} />)}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="container-x">
+          <h2 className="text-2xl font-bold md:text-3xl">Aban Hosting</h2>
+          <p className="mt-2 text-muted-foreground">Affordable monthly NVMe hosting for individuals and small businesses.</p>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {ABAN_HOSTING.map((p) => <ExternalPlanCard key={p.pid} pkg={p} />)}
+          </div>
         </div>
       </section>
 
