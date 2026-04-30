@@ -1,60 +1,40 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PlanCard } from "@/components/site/PlanCard";
+import { ExternalPlanCard } from "@/components/site/ExternalPlanCard";
 import { Button } from "@/components/ui/button";
-import { getProducts } from "@/lib/whmcs.functions";
-import type { Product, ProductCategory } from "@/lib/whmcs-types";
+import { SHARED_HOSTING, RESELLER_HOSTING, ABAN_HOSTING, type PublicPackage } from "@/lib/whmcs-public";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Hosting, Domains, POS & SMS | Abancool" },
-      { name: "description", content: "Transparent pricing across hosting, domains, POS systems and bulk SMS. No hidden fees, ever." },
+      { title: "Pricing — Hosting, Reseller & Aban Hosting | Abancool" },
+      { name: "description", content: "Transparent pricing for shared, reseller and Aban hosting. No hidden fees, ever." },
       { property: "og:title", content: "Pricing | Abancool Technology" },
-      { property: "og:description", content: "All Abancool plans in one place — pick the right service for your business." },
+      { property: "og:description", content: "All Abancool hosting plans in one place — pick the right service for your business." },
     ],
   }),
   component: PricingPage,
 });
 
-const tabs = ["Hosting", "POS", "SMS"] as const;
+const tabs = ["Shared", "Reseller", "Aban"] as const;
 type Tab = (typeof tabs)[number];
 
-function tabForCategory(category: ProductCategory): Tab | null {
-  if (["hosting", "reseller_hosting", "vps"].includes(category)) return "Hosting";
-  if (category === "pos") return "POS";
-  if (category === "sms") return "SMS";
-  return null;
-}
+const groups: Record<Tab, PublicPackage[]> = {
+  Shared: SHARED_HOSTING,
+  Reseller: RESELLER_HOSTING,
+  Aban: ABAN_HOSTING,
+};
 
 function PricingPage() {
-  const [active, setActive] = useState<Tab>("Hosting");
-  const [products, setProducts] = useState<Product[] | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      const r = await getProducts({ data: { category: "all" } }).catch(() => ({ products: [] }));
-      setProducts(r.products);
-    })();
-  }, []);
-
-  const grouped = useMemo(() => {
-    const base: Record<Tab, Product[]> = { Hosting: [], POS: [], SMS: [] };
-    for (const product of products ?? []) {
-      const tab = tabForCategory(product.category);
-      if (tab) base[tab].push(product);
-    }
-    return base;
-  }, [products]);
+  const [active, setActive] = useState<Tab>("Shared");
 
   return (
     <SiteLayout>
       <PageHero
         eyebrow="Pricing"
-        title="Honest pricing for every Abancool service."
-        subtitle="Choose the service, pick a plan and we'll provision it automatically after payment."
+        title="Honest pricing for every Abancool hosting plan."
+        subtitle="Choose the service, click Order Now, and complete checkout securely on our billing portal."
       />
 
       <section className="py-16">
@@ -71,22 +51,14 @@ function PricingPage() {
                     : "text-muted-foreground hover:text-foreground")
                 }
               >
-                {t}
+                {t} Hosting
               </button>
             ))}
           </div>
 
-          {products === null ? (
-            <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : grouped[active].length === 0 ? (
-            <p className="mt-10 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">No {active.toLowerCase()} packages are currently available.</p>
-          ) : (
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {grouped[active].map((p, i) => (
-                <PlanCard key={p.pid} product={p} highlighted={i === 1} />
-              ))}
-            </div>
-          )}
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {groups[active].map((p) => <ExternalPlanCard key={p.pid} pkg={p} />)}
+          </div>
 
           <div className="mt-16 rounded-2xl border border-border bg-secondary/40 p-8 text-center">
             <h3 className="text-xl font-semibold">Need something custom?</h3>
