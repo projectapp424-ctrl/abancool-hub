@@ -1,10 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Store, Utensils, Wine, Pill, BarChart3, Users, Boxes, Receipt, Loader2 } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Store, Utensils, Wine, Pill, BarChart3, Users, Boxes, Receipt } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PlanCard } from "@/components/site/PlanCard";
-import { getProducts } from "@/lib/whmcs.functions";
-import type { Product } from "@/lib/whmcs-types";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/pos-systems")({
   head: () => ({
@@ -33,15 +30,6 @@ const benefits = [
 ];
 
 function PosPage() {
-  const [plans, setPlans] = useState<Product[] | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      const r = await getProducts({ data: { category: "pos" } }).catch(() => ({ products: [] }));
-      setPlans(r.products);
-    })();
-  }, []);
-
   return (
     <SiteLayout>
       <PageHero
