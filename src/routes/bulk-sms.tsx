@@ -1,10 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { MessageSquare, Users, BarChart3, Tag, Upload, Send, Loader2 } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { MessageSquare, Users, BarChart3, Tag, Upload, Send } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/SiteLayout";
-import { PlanCard } from "@/components/site/PlanCard";
-import { getProducts } from "@/lib/whmcs.functions";
-import type { Product } from "@/lib/whmcs-types";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/bulk-sms")({
   head: () => ({
@@ -28,15 +25,6 @@ const features = [
 ];
 
 function SmsPage() {
-  const [plans, setPlans] = useState<Product[] | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      const r = await getProducts({ data: { category: "sms" } }).catch(() => ({ products: [] }));
-      setPlans(r.products);
-    })();
-  }, []);
-
   return (
     <SiteLayout>
       <PageHero
@@ -63,18 +51,12 @@ function SmsPage() {
       </section>
 
       <section className="border-t border-border bg-secondary/40 py-20">
-        <div className="container-x">
-          <h2 className="text-2xl font-bold md:text-3xl">SMS credit packs</h2>
-          <p className="mt-2 text-muted-foreground">Buy credits once. Use them whenever you need.</p>
-          {plans === null ? (
-            <div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : plans.length === 0 ? (
-            <p className="mt-8 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">No SMS packages are currently available.</p>
-          ) : (
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {plans.map((p, i) => <PlanCard key={p.pid} product={p} highlighted={i === 1} />)}
-            </div>
-          )}
+        <div className="container-x rounded-2xl border border-border bg-card p-10 text-center shadow-[var(--shadow-soft)]">
+          <h2 className="text-2xl font-bold md:text-3xl">Need bulk SMS credits?</h2>
+          <p className="mt-2 text-muted-foreground">Talk to our team for volume pricing on branded SMS.</p>
+          <Button className="mt-6" asChild>
+            <Link to="/contact">Contact sales</Link>
+          </Button>
         </div>
       </section>
     </SiteLayout>
