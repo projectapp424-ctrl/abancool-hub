@@ -45,7 +45,7 @@ function DomainsPage() {
     const target = cleaned
       ? `${WHMCS_BASE}?rp=/domain/register&query=${encodeURIComponent(cleaned)}`
       : WHMCS_DOMAINS_URL;
-    window.open(target, "_blank", "noopener,noreferrer");
+    window.location.href = target;
   }
 
   return (
