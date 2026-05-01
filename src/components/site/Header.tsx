@@ -56,10 +56,10 @@ export function Header() {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <a href={WHMCS_LOGIN_URL} target="_blank" rel="noopener noreferrer">Sign in</a>
+                <a href={WHMCS_LOGIN_URL}>Sign in</a>
               </Button>
               <Button size="sm" asChild>
-                <a href={WHMCS_HOME_URL} target="_blank" rel="noopener noreferrer">Get Started</a>
+                <a href={WHMCS_HOME_URL}>Get Started</a>
               </Button>
             </>
           )}
@@ -100,10 +100,10 @@ export function Header() {
               ) : (
                 <>
                   <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <a href={WHMCS_LOGIN_URL} target="_blank" rel="noopener noreferrer">Sign in</a>
+                    <a href={WHMCS_LOGIN_URL}>Sign in</a>
                   </Button>
                   <Button size="sm" className="flex-1" asChild>
-                    <a href={WHMCS_HOME_URL} target="_blank" rel="noopener noreferrer">Get Started</a>
+                    <a href={WHMCS_HOME_URL}>Get Started</a>
                   </Button>
                 </>
               )}

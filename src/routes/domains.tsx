@@ -83,12 +83,12 @@ function DomainsPage() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" asChild>
-                <a href={WHMCS_DOMAIN_TRANSFER_URL} target="_blank" rel="noopener noreferrer">
+                <a href={WHMCS_DOMAIN_TRANSFER_URL}>
                   Transfer a domain <ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               </Button>
               <Button asChild>
-                <a href={WHMCS_DOMAINS_URL} target="_blank" rel="noopener noreferrer">
+                <a href={WHMCS_DOMAINS_URL}>
                   Register new domain <ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               </Button>
