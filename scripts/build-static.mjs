@@ -15,7 +15,7 @@ import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-import { writeFileSync, mkdirSync, copyFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { writeFileSync, mkdirSync, copyFileSync, existsSync, readdirSync, statSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
 
 const root = process.cwd();
@@ -124,6 +124,10 @@ RewriteRule ^ index.html [L]
 </IfModule>
 `
 );
+
+// 6) Clean up the temporary root index.html so it doesn't collide with the
+//    TanStack Start dev server / Lovable preview.
+try { rmSync(resolve(root, "index.html")); } catch {}
 
 console.log("\n✅ Static build complete → dist-static/");
 console.log("   Upload the CONTENTS of dist-static/ into your cPanel public_html/.");
