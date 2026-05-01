@@ -99,8 +99,6 @@ function DomainsPage() {
               <a
                 key={t.tld}
                 href={WHMCS_DOMAINS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] transition hover:border-primary"
               >
                 <span className="text-lg font-semibold text-primary">{t.tld}</span>
