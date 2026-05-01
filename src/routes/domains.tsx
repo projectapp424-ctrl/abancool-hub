@@ -45,7 +45,7 @@ function DomainsPage() {
     const target = cleaned
       ? `${WHMCS_BASE}?rp=/domain/register&query=${encodeURIComponent(cleaned)}`
       : WHMCS_DOMAINS_URL;
-    window.open(target, "_blank", "noopener,noreferrer");
+    window.location.href = target;
   }
 
   return (
@@ -83,12 +83,12 @@ function DomainsPage() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" asChild>
-                <a href={WHMCS_DOMAIN_TRANSFER_URL} target="_blank" rel="noopener noreferrer">
+                <a href={WHMCS_DOMAIN_TRANSFER_URL}>
                   Transfer a domain <ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               </Button>
               <Button asChild>
-                <a href={WHMCS_DOMAINS_URL} target="_blank" rel="noopener noreferrer">
+                <a href={WHMCS_DOMAINS_URL}>
                   Register new domain <ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               </Button>
@@ -99,8 +99,6 @@ function DomainsPage() {
               <a
                 key={t.tld}
                 href={WHMCS_DOMAINS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-soft)] transition hover:border-primary"
               >
                 <span className="text-lg font-semibold text-primary">{t.tld}</span>

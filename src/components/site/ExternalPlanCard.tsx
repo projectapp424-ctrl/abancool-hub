@@ -39,7 +39,7 @@ export function ExternalPlanCard({ pkg, highlighted }: { pkg: PublicPackage; hig
       </ul>
       <div className="mt-6">
         <Button asChild variant={isHot ? "default" : "outline"} className="w-full">
-          <a href={whmcsOrderUrl(pkg.pid)} target="_blank" rel="noopener noreferrer">
+          <a href={whmcsOrderUrl(pkg.pid)}>
             Order Now
             <ExternalLink className="ml-2 h-4 w-4" />
           </a>

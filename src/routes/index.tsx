@@ -18,6 +18,7 @@ import { TeamSection } from "@/components/site/TeamSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImg from "@/assets/hero-tech.jpg";
+import { WHMCS_BASE, WHMCS_DOMAINS_URL } from "@/lib/whmcs-public";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -59,7 +60,13 @@ function HomePage() {
 
             {/* Domain search */}
             <form
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={(e) => {
+                e.preventDefault();
+                const cleaned = domain.trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0];
+                window.location.href = cleaned
+                  ? `${WHMCS_BASE}?rp=/domain/register&query=${encodeURIComponent(cleaned)}`
+                  : WHMCS_DOMAINS_URL;
+              }}
               className="mt-8 flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur sm:flex-row"
             >
               <div className="relative flex-1">
