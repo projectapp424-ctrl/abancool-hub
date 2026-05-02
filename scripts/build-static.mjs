@@ -59,6 +59,49 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   );
 }
 
+// 2b) Write a tiny stub for @tanstack/react-start so server-fn files don't pull
+//     in the Cloudflare/SSR-only start-server-core in a pure SPA build.
+const stubDir = resolve(root, "node_modules/.static-stubs");
+mkdirSync(stubDir, { recursive: true });
+const stubPath = join(stubDir, "react-start-stub.mjs");
+writeFileSync(
+  stubPath,
+  `// Auto-generated stub used by scripts/build-static.mjs only.
+// The static SPA never executes server functions — every protected/server
+// path redirects to the external WHMCS portal — so these are inert no-ops.
+const chain = () => {
+  const api = {
+    middleware: () => api,
+    inputValidator: () => api,
+    validator: () => api,
+    handler: () => async () => { throw new Error("Server functions are disabled in the static build"); },
+  };
+  return api;
+};
+export const createServerFn = () => chain();
+export const createMiddleware = () => ({ server: () => ({}), client: () => ({}) });
+export const useServerFn = (fn) => fn;
+export const getRequest = () => undefined;
+export const getRequestHeader = () => undefined;
+export const getRequestHeaders = () => ({});
+export const getRequestIP = () => undefined;
+export const getRequestHost = () => undefined;
+export const getRequestUrl = () => undefined;
+export const setResponseHeader = () => {};
+export const setResponseHeaders = () => {};
+export const setResponseStatus = () => {};
+export const getCookie = () => undefined;
+export const getCookies = () => ({});
+export const setCookie = () => {};
+export const deleteCookie = () => {};
+export const useSession = async () => ({ data: {}, update: async () => {}, clear: async () => {} });
+export const getSession = async () => ({});
+export const updateSession = async () => {};
+export const clearSession = async () => {};
+export const getValidatedQuery = () => ({});
+`
+);
+
 // 3) Build with a minimal Vite config (no SSR, no Cloudflare plugin).
 await build({
   root,
@@ -69,6 +112,13 @@ await build({
     tsconfigPaths(),
     tailwindcss(),
   ],
+  resolve: {
+    alias: [
+      { find: /^@tanstack\/react-start$/, replacement: stubPath },
+      { find: /^@tanstack\/react-start\/server$/, replacement: stubPath },
+      { find: /^@tanstack\/start-server-core$/, replacement: stubPath },
+    ],
+  },
   build: {
     outDir,
     emptyOutDir: true,
