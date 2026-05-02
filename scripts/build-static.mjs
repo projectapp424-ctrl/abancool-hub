@@ -81,6 +81,24 @@ const chain = () => {
 export const createServerFn = () => chain();
 export const createMiddleware = () => ({ server: () => ({}), client: () => ({}) });
 export const useServerFn = (fn) => fn;
+export const getRequest = () => undefined;
+export const getRequestHeader = () => undefined;
+export const getRequestHeaders = () => ({});
+export const getRequestIP = () => undefined;
+export const getRequestHost = () => undefined;
+export const getRequestUrl = () => undefined;
+export const setResponseHeader = () => {};
+export const setResponseHeaders = () => {};
+export const setResponseStatus = () => {};
+export const getCookie = () => undefined;
+export const getCookies = () => ({});
+export const setCookie = () => {};
+export const deleteCookie = () => {};
+export const useSession = async () => ({ data: {}, update: async () => {}, clear: async () => {} });
+export const getSession = async () => ({});
+export const updateSession = async () => {};
+export const clearSession = async () => {};
+export const getValidatedQuery = () => ({});
 `
 );
 
